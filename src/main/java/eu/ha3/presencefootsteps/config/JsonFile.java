@@ -1,16 +1,15 @@
 package eu.ha3.presencefootsteps.config;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.InstanceCreator;
+import eu.ha3.presencefootsteps.PresenceFootsteps;
+
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Path;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.InstanceCreator;
-
-import eu.ha3.presencefootsteps.PresenceFootsteps;
 
 /**
  * Very simple file loaded from and to json.

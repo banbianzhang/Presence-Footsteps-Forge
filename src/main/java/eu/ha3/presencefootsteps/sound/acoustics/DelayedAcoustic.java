@@ -1,7 +1,6 @@
 package eu.ha3.presencefootsteps.sound.acoustics;
 
 import com.google.gson.JsonObject;
-
 import eu.ha3.presencefootsteps.sound.Options;
 import eu.ha3.presencefootsteps.util.Period;
 

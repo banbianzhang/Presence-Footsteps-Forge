@@ -1,21 +1,19 @@
 package eu.ha3.presencefootsteps.sound.player;
 
-import java.util.Random;
-
+import eu.ha3.presencefootsteps.sound.Options;
+import eu.ha3.presencefootsteps.util.PlayerUtil;
+import eu.ha3.presencefootsteps.world.Association;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.sound.PositionedSoundInstance;
-import net.minecraft.client.sound.SoundInstance;
+import net.minecraft.block.SoundType;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.audio.ISound;
+import net.minecraft.client.audio.SimpleSound;
 import net.minecraft.entity.Entity;
-import net.minecraft.sound.BlockSoundGroup;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.util.Identifier;
-import eu.ha3.presencefootsteps.sound.player.StepSoundPlayer;
-import eu.ha3.presencefootsteps.util.PlayerUtil;
-import eu.ha3.presencefootsteps.sound.Options;
-import eu.ha3.presencefootsteps.sound.player.SoundPlayer;
-import eu.ha3.presencefootsteps.world.Association;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.ResourceLocation;
+
+import java.util.Random;
 
 /**
  * A Library that can also play sounds and default footsteps.
@@ -35,16 +33,16 @@ public class ImmediateSoundPlayer implements SoundPlayer, StepSoundPlayer {
 
     @Override
     public void playStep(Association assos) {
-        BlockSoundGroup soundType = assos.getSoundGroup();
+        SoundType soundType = assos.getSoundGroup();
 
         if (!assos.getMaterial().isLiquid() && soundType != null) {
             BlockState beside = assos.getSource().world.getBlockState(assos.getPos().up());
 
             if (beside.getBlock() == Blocks.SNOW) {
-                soundType = Blocks.SNOW.getSoundGroup(beside);
+                soundType = Blocks.SNOW.getSoundType(beside);
             }
 
-            playAttenuatedSound(assos.getSource(), soundType.getStepSound().getId().toString(), soundType.getVolume() * 0.15F, soundType.getPitch());
+            playAttenuatedSound(assos.getSource(), soundType.getStepSound().getName().toString(), soundType.getVolume() * 0.15F, soundType.getPitch());
         }
     }
 
@@ -61,17 +59,17 @@ public class ImmediateSoundPlayer implements SoundPlayer, StepSoundPlayer {
     }
 
     private void playAttenuatedSound(Entity location, String soundName, float volume, float pitch) {
-        MinecraftClient mc = MinecraftClient.getInstance();
-        double distance = mc.gameRenderer.getCamera().getPos().squaredDistanceTo(location.getPos());
+        Minecraft mc = Minecraft.getInstance();
+        double distance = mc.gameRenderer.getActiveRenderInfo().getProjectedView().squareDistanceTo(location.getPositionVec());
 
         volume *= (100 - distance) / 100F;
 
-        PositionedSoundInstance sound = createSound(getSoundId(soundName, location), volume, pitch, location);
+        SimpleSound sound = createSound(getSoundId(soundName, location), volume, pitch, location);
 
         if (distance > 100) {
-            mc.getSoundManager().play(sound, (int) Math.floor(Math.sqrt(distance) / 2));
+            mc.getSoundHandler().playDelayed(sound, (int) Math.floor(Math.sqrt(distance) / 2));
         } else {
-            mc.getSoundManager().play(sound);
+            mc.getSoundHandler().play(sound);
         }
     }
 
@@ -80,20 +78,20 @@ public class ImmediateSoundPlayer implements SoundPlayer, StepSoundPlayer {
         delayedPlayer.think();
     }
 
-    private PositionedSoundInstance createSound(Identifier id, float volume, float pitch, Entity entity) {
-        return new PositionedSoundInstance(id,
+    private SimpleSound createSound(ResourceLocation id, float volume, float pitch, Entity entity) {
+        return new SimpleSound(id,
                 SoundCategory.MASTER,
                 volume, pitch, false, 0,
-                SoundInstance.AttenuationType.LINEAR,
-                (float) entity.getX(),
-                (float) entity.getY(),
-                (float) entity.getZ(),
+                ISound.AttenuationType.LINEAR,
+                (float) entity.getPosX(),
+                (float) entity.getPosY(),
+                (float) entity.getPosZ(),
                 false);
     }
 
-    private Identifier getSoundId(String name, Entity location) {
+    private ResourceLocation getSoundId(String name, Entity location) {
         if (name.indexOf(':') >= 0) {
-            return new Identifier(name);
+            return new ResourceLocation(name);
         }
 
         String domain = "presencefootsteps";
@@ -102,6 +100,6 @@ public class ImmediateSoundPlayer implements SoundPlayer, StepSoundPlayer {
             domain += "mono"; // Switch to mono if playing another player
         }
 
-        return new Identifier(domain, name);
+        return new ResourceLocation(domain, name);
     }
 }

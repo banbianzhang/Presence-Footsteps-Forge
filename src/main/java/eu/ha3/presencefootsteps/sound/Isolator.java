@@ -8,9 +8,9 @@ import eu.ha3.presencefootsteps.world.Index;
 import eu.ha3.presencefootsteps.world.Lookup;
 import eu.ha3.presencefootsteps.world.Solver;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.SoundType;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
-import net.minecraft.sound.BlockSoundGroup;
 
 public interface Isolator {
     AcousticLibrary getAcoustics();
@@ -23,7 +23,7 @@ public interface Isolator {
 
     Lookup<BlockState> getBlockMap();
 
-    Lookup<BlockSoundGroup> getPrimitiveMap();
+    Lookup<SoundType> getPrimitiveMap();
 
     StepSoundPlayer getStepPlayer();
 

@@ -1,47 +1,25 @@
 package eu.ha3.presencefootsteps.util;
 
+import com.google.gson.stream.JsonWriter;
+import com.minelittlepony.common.util.GamePaths;
+import eu.ha3.presencefootsteps.PresenceFootsteps;
+import eu.ha3.presencefootsteps.world.Lookup;
+import net.minecraft.block.*;
+import net.minecraft.client.Minecraft;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.util.text.event.ClickEvent;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.registry.Registry;
+
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.function.Predicate;
-
-import javax.annotation.Nullable;
-
-import com.google.gson.stream.JsonWriter;
-import com.minelittlepony.common.util.GamePaths;
-
-import eu.ha3.presencefootsteps.PresenceFootsteps;
-import eu.ha3.presencefootsteps.world.Lookup;
-import net.minecraft.block.AbstractPressurePlateBlock;
-import net.minecraft.block.AbstractRailBlock;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.BlockWithEntity;
-import net.minecraft.block.CarpetBlock;
-import net.minecraft.block.ConnectingBlock;
-import net.minecraft.block.FallingBlock;
-import net.minecraft.block.FluidBlock;
-import net.minecraft.block.HorizontalFacingBlock;
-import net.minecraft.block.InfestedBlock;
-import net.minecraft.block.LeavesBlock;
-import net.minecraft.block.PaneBlock;
-import net.minecraft.block.PlantBlock;
-import net.minecraft.block.SlabBlock;
-import net.minecraft.block.SnowyBlock;
-import net.minecraft.block.SpreadableBlock;
-import net.minecraft.block.StairsBlock;
-import net.minecraft.block.TallPlantBlock;
-import net.minecraft.block.TorchBlock;
-import net.minecraft.block.TransparentBlock;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
 
 public class BlockReport {
     private final Path loc;
@@ -55,7 +33,7 @@ public class BlockReport {
             writeReport(filter);
             printResults();
         } catch (Exception e) {
-            addMessage(new TranslatableText("pf.report.error", e.getMessage()).styled(s -> s.withColor(Formatting.RED)));
+            addMessage(new TranslationTextComponent("pf.report.error", e.getMessage()).modifyStyle(s -> s.setFormatting(TextFormatting.RED)));
         }
     }
 
@@ -72,7 +50,7 @@ public class BlockReport {
 
                 try {
                     if (filter == null || filter.test(state)) {
-                        writer.name(Registry.BLOCK.getId(block).toString());
+                        writer.name(Registry.BLOCK.getKey(block).toString());
                         writer.beginObject();
                         writer.name("class");
                         writer.value(getClassData(state));
@@ -90,8 +68,8 @@ public class BlockReport {
             writer.name("unmapped_entities");
             writer.beginArray();
             Registry.ENTITY_TYPE.forEach(type -> {
-                if (type.create(MinecraftClient.getInstance().world) instanceof LivingEntity) {
-                    Identifier id = Registry.ENTITY_TYPE.getId(type);
+                if (type.create(Minecraft.getInstance().world) instanceof LivingEntity) {
+                    ResourceLocation id = Registry.ENTITY_TYPE.getKey(type);
                     if (!PresenceFootsteps.getInstance().getEngine().getIsolator().getLocomotionMap().contains(id)) {
                         try {
                             writer.value(id.toString());
@@ -107,13 +85,13 @@ public class BlockReport {
     }
 
     private String getSoundData(BlockState state) {
-        if (state.getSoundGroup() == null) {
+        if (state.getSoundType() == null) {
             return "NULL";
         }
-        if (state.getSoundGroup().getStepSound() == null) {
+        if (state.getSoundType().getStepSound() == null) {
             return "NO_SOUND";
         }
-        return state.getSoundGroup().getStepSound().getId().getPath();
+        return state.getSoundType().getStepSound().getName().getPath();
     }
 
     private String getClassData(BlockState state) {
@@ -123,38 +101,38 @@ public class BlockReport {
 
         if (block instanceof AbstractPressurePlateBlock) soundName += ",EXTENDS_PRESSURE_PLATE";
         if (block instanceof AbstractRailBlock) soundName += ",EXTENDS_RAIL";
-        if (block instanceof BlockWithEntity) soundName += ",EXTENDS_CONTAINER";
-        if (block instanceof FluidBlock) soundName += ",EXTENDS_LIQUID";
-        if (block instanceof PlantBlock) soundName += ",EXTENDS_PLANT";
-        if (block instanceof TallPlantBlock) soundName += ",EXTENDS_DOUBLE_PLANT";
-        if (block instanceof ConnectingBlock) soundName += ",EXTENDS_CONNECTED_PLANT";
+        if (block instanceof ContainerBlock) soundName += ",EXTENDS_CONTAINER";
+        if (block instanceof FlowingFluidBlock) soundName += ",EXTENDS_LIQUID";
+        if (block instanceof BushBlock) soundName += ",EXTENDS_PLANT";
+        if (block instanceof DoublePlantBlock) soundName += ",EXTENDS_DOUBLE_PLANT";
+        if (block instanceof SixWayBlock) soundName += ",EXTENDS_CONNECTED_PLANT";
         if (block instanceof LeavesBlock) soundName += ",EXTENDS_LEAVES";
         if (block instanceof SlabBlock) soundName += ",EXTENDS_SLAB";
         if (block instanceof StairsBlock) soundName += ",EXTENDS_STAIRS";
-        if (block instanceof SnowyBlock) soundName += ",EXTENDS_SNOWY";
-        if (block instanceof SpreadableBlock) soundName += ",EXTENDS_SPREADABLE";
+        if (block instanceof SnowyDirtBlock) soundName += ",EXTENDS_SNOWY";
+        if (block instanceof SpreadableSnowyDirtBlock) soundName += ",EXTENDS_SPREADABLE";
         if (block instanceof FallingBlock) soundName += ",EXTENDS_PHYSICALLY_FALLING";
         if (block instanceof PaneBlock) soundName += ",EXTENDS_PANE";
-        if (block instanceof HorizontalFacingBlock) soundName += ",EXTENDS_PILLAR";
+        if (block instanceof HorizontalBlock) soundName += ",EXTENDS_PILLAR";
         if (block instanceof TorchBlock) soundName += ",EXTENDS_TORCH";
         if (block instanceof CarpetBlock) soundName += ",EXTENDS_CARPET";
-        if (block instanceof InfestedBlock) soundName += ",EXTENDS_INFESTED";
-        if (block instanceof TransparentBlock) soundName += ",EXTENDS_TRANSPARENT";
+        if (block instanceof SilverfishBlock) soundName += ",EXTENDS_INFESTED";
+        if (block instanceof BreakableBlock) soundName += ",EXTENDS_TRANSPARENT";
 
         return soundName;
     }
 
     private void printResults() {
-        addMessage(new TranslatableText("pf.report.save")
-                .append(new LiteralText(loc.getFileName().toString()).styled(s -> s
-                    .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, loc.toString()))
-                    .withFormatting(Formatting.UNDERLINE)))
-                .styled(s -> s
-                    .withColor(Formatting.GREEN)));
+        addMessage(new TranslationTextComponent("pf.report.save")
+                .append(new StringTextComponent(loc.getFileName().toString()).modifyStyle(s -> s
+                    .setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, loc.toString()))
+                    .applyFormatting(TextFormatting.UNDERLINE)))
+                .modifyStyle(s -> s
+                    .setFormatting(TextFormatting.GREEN)));
     }
 
-    public static void addMessage(Text text) {
-        MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(text);
+    public static void addMessage(ITextComponent text) {
+        Minecraft.getInstance().ingameGUI.getChatGUI().printChatMessage(text);
     }
 
     static Path getUniqueFileName(Path directory, String baseName, String ext) {

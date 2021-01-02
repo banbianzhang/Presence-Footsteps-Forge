@@ -1,10 +1,9 @@
 package eu.ha3.presencefootsteps.util;
 
-import java.util.Random;
-
 import com.google.gson.JsonObject;
-
 import eu.ha3.presencefootsteps.sound.acoustics.AcousticsJsonParser;
+
+import java.util.Random;
 
 public class Range {
 

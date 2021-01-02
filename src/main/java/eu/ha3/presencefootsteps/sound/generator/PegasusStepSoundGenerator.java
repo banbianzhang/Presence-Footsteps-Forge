@@ -1,8 +1,8 @@
 package eu.ha3.presencefootsteps.sound.generator;
 
+import eu.ha3.presencefootsteps.sound.Options;
 import eu.ha3.presencefootsteps.sound.State;
 import eu.ha3.presencefootsteps.util.MathUtil;
-import eu.ha3.presencefootsteps.sound.Options;
 import net.minecraft.entity.LivingEntity;
 
 class PegasusStepSoundGenerator extends QuadrapedalStepSoundGenerator {
@@ -73,7 +73,7 @@ class PegasusStepSoundGenerator extends QuadrapedalStepSoundGenerator {
 
     @Override
     protected void simulateJumpingLanding(LivingEntity ply) {
-        if (hasStoppingConditions(ply)) {
+        if (solver.hasStoppingConditions(ply)) {
             return;
         }
 
@@ -109,13 +109,13 @@ class PegasusStepSoundGenerator extends QuadrapedalStepSoundGenerator {
     protected void simulateFlying(LivingEntity ply) {
         final long now = System.currentTimeMillis();
 
-        if (updateState(motionX, motionY, motionZ, ply.sidewaysSpeed)) {
+        if (updateState(motionX, motionY, motionZ, ply.moveStrafing)) {
             nextFlapTime = now + variator.FLIGHT_TRANSITION_TIME;
         }
 
-        if (!ply.isSubmergedInWater() && !isFalling && now > nextFlapTime) {
-            nextFlapTime = now + getWingSpeed() + (ply.world.random.nextInt(100) - 50);
-            flapMod = (flapMod + 1) % (1 + ply.world.random.nextInt(4));
+        if (!ply.canSwim() && !isFalling && now > nextFlapTime) {
+            nextFlapTime = now + getWingSpeed() + (ply.world.rand.nextInt(100) - 50);
+            flapMod = (flapMod + 1) % (1 + ply.world.rand.nextInt(4));
 
             float volume = 1;
             long diffImmobile = now - lastTimeImmobile;

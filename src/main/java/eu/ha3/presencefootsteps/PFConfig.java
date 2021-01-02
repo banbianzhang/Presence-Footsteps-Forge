@@ -1,10 +1,10 @@
 package eu.ha3.presencefootsteps;
 
-import java.nio.file.Path;
-
 import eu.ha3.presencefootsteps.config.JsonFile;
 import eu.ha3.presencefootsteps.sound.generator.Locomotion;
 import net.minecraft.util.math.MathHelper;
+
+import java.nio.file.Path;
 
 public class PFConfig extends JsonFile {
 

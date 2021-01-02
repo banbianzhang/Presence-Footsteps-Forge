@@ -1,9 +1,9 @@
 package eu.ha3.presencefootsteps.sound.generator;
 
-import java.util.Random;
-
 import eu.ha3.presencefootsteps.sound.State;
 import net.minecraft.entity.LivingEntity;
+
+import java.util.Random;
 
 class QuadrapedalStepSoundGenerator extends BipedalStepSoundGenerator {
 

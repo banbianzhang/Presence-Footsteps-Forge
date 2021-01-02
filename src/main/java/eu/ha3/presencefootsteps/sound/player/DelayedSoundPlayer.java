@@ -1,13 +1,13 @@
 package eu.ha3.presencefootsteps.sound.player;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
 import eu.ha3.presencefootsteps.PresenceFootsteps;
 import eu.ha3.presencefootsteps.sound.Options;
 import eu.ha3.presencefootsteps.util.MathUtil;
 import net.minecraft.entity.Entity;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 class DelayedSoundPlayer implements SoundPlayer {
 

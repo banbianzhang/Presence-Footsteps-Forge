@@ -1,21 +1,21 @@
 package eu.ha3.presencefootsteps.world;
 
+import net.minecraft.block.SoundType;
+import net.minecraft.util.ResourceLocation;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-import net.minecraft.sound.BlockSoundGroup;
-import net.minecraft.util.Identifier;
+public class PrimitiveLookup implements Lookup<SoundType> {
 
-public class PrimitiveLookup implements Lookup<BlockSoundGroup> {
-
-    private final Map<String, Map<Identifier, String>> substrates = new LinkedHashMap<>();
+    private final Map<String, Map<ResourceLocation, String>> substrates = new LinkedHashMap<>();
 
     @Override
-    public String getAssociation(BlockSoundGroup sounds, String substrate) {
+    public String getAssociation(SoundType sounds, String substrate) {
 
-        Identifier id = sounds.getStepSound().getId();
-        Map<Identifier, String> primitives = substrates.get(substrate);
+        ResourceLocation id = sounds.getStepSound().getName();
+        Map<ResourceLocation, String> primitives = substrates.get(substrate);
 
         if (primitives == null) {
             // Check for break sound
@@ -48,14 +48,14 @@ public class PrimitiveLookup implements Lookup<BlockSoundGroup> {
 
         substrates
             .computeIfAbsent(substrate, s -> new LinkedHashMap<>())
-            .put(new Identifier(primitive), value);
+            .put(new ResourceLocation(primitive), value);
     }
 
     @Override
-    public boolean contains(BlockSoundGroup sounds) {
-        Identifier primitive = sounds.getStepSound().getId();
+    public boolean contains(SoundType sounds) {
+        ResourceLocation primitive = sounds.getStepSound().getName();
 
-        for (Map<Identifier, String> primitives : substrates.values()) {
+        for (Map<ResourceLocation, String> primitives : substrates.values()) {
             if (primitives.containsKey(primitive)) {
                 return true;
             }

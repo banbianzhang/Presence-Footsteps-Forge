@@ -1,26 +1,25 @@
 package eu.ha3.presencefootsteps;
 
-import javax.annotation.Nullable;
-
 import com.minelittlepony.common.client.gui.GameGui;
 import com.minelittlepony.common.client.gui.element.Button;
 import com.minelittlepony.common.client.gui.element.EnumSlider;
 import com.minelittlepony.common.client.gui.element.Label;
 import com.minelittlepony.common.client.gui.element.Slider;
-
 import eu.ha3.presencefootsteps.sound.generator.Locomotion;
 import eu.ha3.presencefootsteps.util.BlockReport;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.resource.language.I18n;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.client.resources.I18n;
+import com.mojang.blaze3d.matrix.MatrixStack;
+import net.minecraft.util.text.TranslationTextComponent;
 
-class PFOptionsScreen extends GameGui {
+import javax.annotation.Nullable;
+
+public class PFOptionsScreen extends GameGui {
 
     //private Label ponifiedLabel;
 
     public PFOptionsScreen(@Nullable Screen parent) {
-        super(new TranslatableText("menu.pf.title"), parent);
+        super(new TranslationTextComponent("menu.pf.title"), parent);
     }
 
     @Override
@@ -56,13 +55,13 @@ class PFOptionsScreen extends GameGui {
 
         addButton(new Button(left, row += 24, 96, 20).onClick(sender -> {
             new BlockReport("report_concise").execute(state -> !PresenceFootsteps.getInstance().getEngine().getIsolator().getBlockMap().contains(state));
-        })).setEnabled(client.world != null)
+        })).setEnabled(minecraft.world != null)
             .getStyle()
             .setText("menu.pf.report.concise");
 
         addButton(new Button(left + 104, row, 96, 20)
             .onClick(sender -> new BlockReport("report_full").execute(null)))
-            .setEnabled(client.world != null)
+            .setEnabled(minecraft.world != null)
             .getStyle()
                 .setText("menu.pf.report.full");
 
@@ -85,6 +84,6 @@ class PFOptionsScreen extends GameGui {
             return "menu.pf.volume.min";
         }
 
-        return I18n.translate("menu.pf.volume", (int)Math.floor(volume));
+        return I18n.format("menu.pf.volume", (int)Math.floor(volume));
     }
 }

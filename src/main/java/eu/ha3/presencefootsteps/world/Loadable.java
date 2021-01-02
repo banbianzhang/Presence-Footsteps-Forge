@@ -1,9 +1,9 @@
 package eu.ha3.presencefootsteps.world;
 
-import java.io.Reader;
-
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+
+import java.io.Reader;
 
 public interface Loadable {
     Gson GSON = new Gson();

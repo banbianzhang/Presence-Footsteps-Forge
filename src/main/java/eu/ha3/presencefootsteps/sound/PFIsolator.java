@@ -1,24 +1,18 @@
 package eu.ha3.presencefootsteps.sound;
 
-import java.util.Random;
 import eu.ha3.presencefootsteps.config.Variator;
-import eu.ha3.presencefootsteps.sound.player.StepSoundPlayer;
 import eu.ha3.presencefootsteps.sound.acoustics.AcousticLibrary;
 import eu.ha3.presencefootsteps.sound.acoustics.AcousticsPlayer;
 import eu.ha3.presencefootsteps.sound.generator.Locomotion;
 import eu.ha3.presencefootsteps.sound.player.SoundPlayer;
-import eu.ha3.presencefootsteps.world.GolemLookup;
-import eu.ha3.presencefootsteps.world.Index;
-import eu.ha3.presencefootsteps.world.LocomotionLookup;
-import eu.ha3.presencefootsteps.world.Lookup;
-import eu.ha3.presencefootsteps.world.PFSolver;
-import eu.ha3.presencefootsteps.world.PrimitiveLookup;
-import eu.ha3.presencefootsteps.world.Solver;
-import eu.ha3.presencefootsteps.world.StateLookup;
+import eu.ha3.presencefootsteps.sound.player.StepSoundPlayer;
+import eu.ha3.presencefootsteps.world.*;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
-import net.minecraft.sound.BlockSoundGroup;
+import net.minecraft.block.SoundType;
+
+import java.util.Random;
 
 public class PFIsolator implements Isolator, SoundPlayer {
 
@@ -32,7 +26,7 @@ public class PFIsolator implements Isolator, SoundPlayer {
 
     private final Lookup<BlockState> blockMap = new StateLookup();
 
-    private final Lookup<BlockSoundGroup> primitiveMap = new PrimitiveLookup();
+    private final Lookup<SoundType> primitiveMap = new PrimitiveLookup();
 
     private final AcousticsPlayer acoustics = new AcousticsPlayer(this);
 
@@ -83,7 +77,7 @@ public class PFIsolator implements Isolator, SoundPlayer {
     }
 
     @Override
-    public Lookup<BlockSoundGroup> getPrimitiveMap() {
+    public Lookup<SoundType> getPrimitiveMap() {
         return primitiveMap;
     }
 

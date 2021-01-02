@@ -1,16 +1,16 @@
 package eu.ha3.presencefootsteps.util;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.OtherClientPlayerEntity;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.player.RemoteClientPlayerEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 
 public class PlayerUtil {
     public static boolean isClientPlayer(Entity entity) {
-        PlayerEntity client = MinecraftClient.getInstance().player;
+        PlayerEntity client = Minecraft.getInstance().player;
         return entity instanceof PlayerEntity
-                && !(entity instanceof OtherClientPlayerEntity)
+                && !(entity instanceof RemoteClientPlayerEntity)
                 && client != null
-                && (client == entity || client.getUuid().equals(entity.getUuid()));
+                && (client == entity || client.getUniqueID().equals(entity.getUniqueID()));
     }
 }

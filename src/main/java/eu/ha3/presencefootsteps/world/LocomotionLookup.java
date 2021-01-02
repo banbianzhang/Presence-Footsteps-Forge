@@ -1,33 +1,33 @@
 package eu.ha3.presencefootsteps.world;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 import eu.ha3.presencefootsteps.PresenceFootsteps;
 import eu.ha3.presencefootsteps.sound.generator.Locomotion;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.Identifier;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class LocomotionLookup implements Index<Entity, Locomotion> {
 
-    private final Map<Identifier, Locomotion> values = new LinkedHashMap<>();
+    private final Map<ResourceLocation, Locomotion> values = new LinkedHashMap<>();
 
     @Override
     public Locomotion lookup(Entity key) {
         if (key instanceof PlayerEntity) {
             return Locomotion.forPlayer((PlayerEntity)key, Locomotion.NONE);
         }
-        return Locomotion.forLiving(key, values.getOrDefault(EntityType.getId(key.getType()), Locomotion.BIPED));
+        return Locomotion.forLiving(key, values.getOrDefault(EntityType.getKey(key.getType()), Locomotion.BIPED));
     }
 
     @Override
     public void add(String key, String value) {
-        Identifier id = new Identifier(key);
+        ResourceLocation id = new ResourceLocation(key);
 
-        if (!Registry.ENTITY_TYPE.containsId(id)) {
+        if (!Registry.ENTITY_TYPE.containsKey(id)) {
             PresenceFootsteps.logger.warn("Locomotion registered for unknown entity type " + id);
         }
 
@@ -35,7 +35,7 @@ public class LocomotionLookup implements Index<Entity, Locomotion> {
     }
 
     @Override
-    public boolean contains(Identifier key) {
+    public boolean contains(ResourceLocation key) {
         return values.containsKey(key);
     }
 }

@@ -1,8 +1,8 @@
 package eu.ha3.presencefootsteps.util;
 
-import java.util.Random;
-
 import net.minecraft.util.math.MathHelper;
+
+import java.util.Random;
 
 public class MathUtil {
     public static float randAB(Random rng, float a, float b) {

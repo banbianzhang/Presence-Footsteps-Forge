@@ -1,39 +1,39 @@
 package eu.ha3.presencefootsteps;
 
-import java.util.List;
-import java.util.Map;
-
 import eu.ha3.presencefootsteps.sound.SoundEngine;
 import eu.ha3.presencefootsteps.world.Emitter;
 import net.minecraft.block.BlockState;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.hit.HitResult;
+import net.minecraft.client.Minecraft;
+import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.util.math.RayTraceResult;
+
+import java.util.List;
+import java.util.Map;
 
 public class PFDebugHud {
 
     private final SoundEngine engine;
 
-    PFDebugHud(SoundEngine engine) {
+    public PFDebugHud(SoundEngine engine) {
         this.engine = engine;
     }
 
-    public void render(HitResult blockHit, HitResult fluidHit, List<String> list) {
-        MinecraftClient client = MinecraftClient.getInstance();
+    public void render(RayTraceResult blockHit, RayTraceResult fluidHit, List<String> list) {
+        Minecraft client = Minecraft.getInstance();
 
-        if (blockHit.getType() == HitResult.Type.BLOCK) {
-            BlockState state = client.world.getBlockState(((BlockHitResult)blockHit).getBlockPos());
+        if (blockHit.getType() == RayTraceResult.Type.BLOCK) {
+            BlockState state = client.world.getBlockState(((BlockRayTraceResult)blockHit).getPos());
 
             renderSoundList("PF Sounds",
                     engine.getIsolator().getBlockMap().getAssociations(state),
                     list);
         }
 
-        if (client.targetedEntity != null) {
+        if (client.pointedEntity != null) {
             renderSoundList("PF Golem Sounds",
-                    engine.getIsolator().getGolemMap().getAssociations(client.targetedEntity.getType()),
+                    engine.getIsolator().getGolemMap().getAssociations(client.pointedEntity.getType()),
                     list);
-            list.add(engine.getIsolator().getLocomotionMap().lookup(client.targetedEntity).getDisplayName());
+            list.add(engine.getIsolator().getLocomotionMap().lookup(client.pointedEntity).getDisplayName());
         }
     }
 
