@@ -1,0 +1,3 @@
+# Presence-Footsteps-Forge
+An overly complicated footstep sound enhancement mod for Minecraft, ported to Forge.
+https://www.curseforge.com/minecraft/mc-mods/presence-footsteps-forge
