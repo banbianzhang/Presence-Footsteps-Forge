@@ -5,21 +5,20 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.List;
 import java.util.function.Consumer;
-
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.Resource;
+import net.minecraft.server.packs.resources.ResourceManager;
 import eu.ha3.presencefootsteps.PresenceFootsteps;
-import net.minecraft.resource.Resource;
-import net.minecraft.resource.ResourceManager;
-import net.minecraft.util.Identifier;
 
 public interface ResourceUtils {
 
-    static void forEach(Identifier id, ResourceManager manager, Consumer<Reader> consumer) {
+    static void forEach(ResourceLocation id, ResourceManager manager, Consumer<Reader> consumer) {
         try {
-            manager.getAllResources(id).forEach(res -> {
+            manager.getResources(id).forEach(res -> {
                 try (Reader stream = new InputStreamReader(res.getInputStream())) {
                     consumer.accept(stream);
                 } catch (Exception e) {
-                    PresenceFootsteps.logger.error("Error encountered loading resource " + res.getId() + " from pack" + res.getResourcePackName(), e);
+                    PresenceFootsteps.logger.error("Error encountered loading resource " + res.getLocation() + " from pack" + res.getSourceName(), e);
                 }
             });
         } catch (IOException e) {
@@ -27,15 +26,15 @@ public interface ResourceUtils {
         }
     }
 
-    static void forEachReverse(Identifier id, ResourceManager manager, Consumer<Reader> consumer) {
+    static void forEachReverse(ResourceLocation id, ResourceManager manager, Consumer<Reader> consumer) {
         try {
-            List<Resource> resources = manager.getAllResources(id);
+            List<Resource> resources = manager.getResources(id);
             for (int i = resources.size() - 1; i >= 0; i--) {
                 Resource res = resources.get(i);
                 try (Reader stream = new InputStreamReader(res.getInputStream())) {
                     consumer.accept(stream);
                 } catch (Exception e) {
-                    PresenceFootsteps.logger.error("Error encountered loading resource " + res.getId() + " from pack" + res.getResourcePackName(), e);
+                    PresenceFootsteps.logger.error("Error encountered loading resource " + res.getLocation() + " from pack" + res.getSourceName(), e);
                 }
             }
         } catch (IOException e) {

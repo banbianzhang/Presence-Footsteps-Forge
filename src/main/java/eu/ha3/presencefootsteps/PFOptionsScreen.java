@@ -1,7 +1,9 @@
 package eu.ha3.presencefootsteps;
 
 import java.util.Optional;
-
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import org.jetbrains.annotations.Nullable;
 
 import com.minelittlepony.common.client.gui.GameGui;
@@ -10,19 +12,14 @@ import com.minelittlepony.common.client.gui.element.Button;
 import com.minelittlepony.common.client.gui.element.EnumSlider;
 import com.minelittlepony.common.client.gui.element.Label;
 import com.minelittlepony.common.client.gui.element.Slider;
-
+import com.mojang.blaze3d.vertex.PoseStack;
 import eu.ha3.mc.quick.update.Versions;
 import eu.ha3.presencefootsteps.util.BlockReport;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
 
 class PFOptionsScreen extends GameGui {
 
     public PFOptionsScreen(@Nullable Screen parent) {
-        super(new TranslatableText("menu.pf.title"), parent);
+        super(new TranslatableComponent("menu.pf.title"), parent);
     }
 
     @Override
@@ -66,7 +63,7 @@ class PFOptionsScreen extends GameGui {
             new BlockReport("report_concise")
                 .execute(state -> !PresenceFootsteps.getInstance().getEngine().getIsolator().getBlockMap().contains(state))
                 .thenRun(() -> sender.setEnabled(true));
-        })).setEnabled(client.world != null)
+        })).setEnabled(minecraft.level != null)
             .getStyle()
             .setText("menu.pf.report.concise");
 
@@ -77,7 +74,7 @@ class PFOptionsScreen extends GameGui {
                     .execute(null)
                     .thenRun(() -> sender.setEnabled(true));
             }))
-            .setEnabled(client.world != null)
+            .setEnabled(minecraft.level != null)
             .getStyle()
                 .setText("menu.pf.report.full");
 
@@ -87,7 +84,7 @@ class PFOptionsScreen extends GameGui {
     }
 
     @Override
-    public void render(MatrixStack matrices, int mouseX, int mouseY, float partialTicks) {
+    public void render(PoseStack matrices, int mouseX, int mouseY, float partialTicks) {
         renderBackground(matrices);
         super.render(matrices, mouseX, mouseY, partialTicks);
     }
@@ -101,17 +98,17 @@ class PFOptionsScreen extends GameGui {
            .setColor(hasUpdate ? 0xAAFF00 : 0xFFFFFF)
            .setTooltip(versions
                    .map(Versions::latest)
-                   .map(latest -> (Text)new TranslatableText("pf.update.updates_available",
+                   .map(latest -> (Component)new TranslatableComponent("pf.update.updates_available",
                            latest.version().getFriendlyString(),
                            latest.minecraft().getFriendlyString()))
-                   .orElse(new TranslatableText("pf.update.up_to_date")));
+                   .orElse(new TranslatableComponent("pf.update.up_to_date")));
     }
 
-    private Text formatVolume(AbstractSlider<Float> slider) {
+    private Component formatVolume(AbstractSlider<Float> slider) {
         if (slider.getValue() <= 0) {
-            return new TranslatableText("menu.pf.volume.min");
+            return new TranslatableComponent("menu.pf.volume.min");
         }
 
-        return new TranslatableText("menu.pf.volume", (int)Math.floor(slider.getValue()));
+        return new TranslatableComponent("menu.pf.volume", (int)Math.floor(slider.getValue()));
     }
 }

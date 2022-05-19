@@ -2,9 +2,9 @@ package eu.ha3.presencefootsteps.sound.generator;
 
 import eu.ha3.presencefootsteps.sound.State;
 import eu.ha3.presencefootsteps.util.MathUtil;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.phys.Vec3;
 import eu.ha3.presencefootsteps.sound.Options;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.util.math.Vec3d;
 
 class WingedStepSoundGenerator extends TerrestrialStepSoundGenerator {
 
@@ -38,7 +38,7 @@ class WingedStepSoundGenerator extends TerrestrialStepSoundGenerator {
     protected boolean updateImmobileState(LivingEntity ply, float reference) {
 
         if (isAirborne) {
-            final Vec3d vel = ply.getVelocity();
+            final Vec3 vel = ply.getDeltaMovement();
 
             boolean stationary = vel.x != 0 && vel.z != 0;
             lastReference = reference;
@@ -136,13 +136,13 @@ class WingedStepSoundGenerator extends TerrestrialStepSoundGenerator {
     protected void simulateFlying(LivingEntity ply) {
         final long now = System.currentTimeMillis();
 
-        if (updateState(motionX, motionY, motionZ, ply.sidewaysSpeed)) {
+        if (updateState(motionX, motionY, motionZ, ply.xxa)) {
             nextFlapTime = now + variator.FLIGHT_TRANSITION_TIME;
         }
 
-        if (!ply.isSubmergedInWater() && !isFalling && now > nextFlapTime) {
-            nextFlapTime = now + getWingSpeed() + (ply.world.random.nextInt(100) - 50);
-            flapMod = (flapMod + 1) % (1 + ply.world.random.nextInt(4));
+        if (!ply.isUnderWater() && !isFalling && now > nextFlapTime) {
+            nextFlapTime = now + getWingSpeed() + (ply.level.random.nextInt(100) - 50);
+            flapMod = (flapMod + 1) % (1 + ply.level.random.nextInt(4));
 
             float volume = 1;
             long diffImmobile = now - lastTimeImmobile;

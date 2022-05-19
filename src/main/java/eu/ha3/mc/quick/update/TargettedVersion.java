@@ -7,7 +7,6 @@ import net.fabricmc.loader.api.ModContainer;
 import net.fabricmc.loader.api.Version;
 import net.fabricmc.loader.api.VersionParsingException;
 import net.fabricmc.loader.api.metadata.ModMetadata;
-import net.minecraft.util.JsonHelper;
 
 public record TargettedVersion (
         Version minecraft,

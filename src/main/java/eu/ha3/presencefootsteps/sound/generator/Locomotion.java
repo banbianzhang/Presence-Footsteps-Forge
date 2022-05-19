@@ -3,13 +3,12 @@ package eu.ha3.presencefootsteps.sound.generator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
-
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.resource.language.I18n;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 
 public enum Locomotion {
     NONE(() -> StepSoundGenerator.EMPTY),
@@ -41,12 +40,12 @@ public enum Locomotion {
         return constructor.get();
     }
 
-    public Text getOptionName() {
-        return new TranslatableText("menu.pf.stance", new TranslatableText(this == NONE ? AUTO_TRANSLATION_KEY : translationKey));
+    public Component getOptionName() {
+        return new TranslatableComponent("menu.pf.stance", new TranslatableComponent(this == NONE ? AUTO_TRANSLATION_KEY : translationKey));
     }
 
     public String getDisplayName() {
-        return I18n.translate("pf.stance", I18n.translate(translationKey));
+        return I18n.get("pf.stance", I18n.get(translationKey));
     }
 
     public static Locomotion byName(String name) {
@@ -61,9 +60,9 @@ public enum Locomotion {
         return fallback;
     }
 
-    public static Locomotion forPlayer(PlayerEntity ply, Locomotion preference) {
+    public static Locomotion forPlayer(Player ply, Locomotion preference) {
         if (preference == NONE) {
-            if (ply instanceof ClientPlayerEntity && MineLP.hasPonies()) {
+            if (ply instanceof LocalPlayer && MineLP.hasPonies()) {
                 return MineLP.getLocomotion(ply);
             }
 

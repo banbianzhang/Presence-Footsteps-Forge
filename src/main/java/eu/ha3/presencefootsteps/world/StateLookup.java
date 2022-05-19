@@ -7,15 +7,15 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.Property;
 import com.google.common.collect.Lists;
 
 import eu.ha3.presencefootsteps.PresenceFootsteps;
-import net.minecraft.block.BlockState;
-import net.minecraft.state.property.Property;
-import net.minecraft.tag.TagKey;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
+import eu.ha3.presencefootsteps.world.StateLookup.Key.Attribute;
 
 /**
  * A state lookup that finds an association for a given block state within a specific substrate (or no substrate).
@@ -73,8 +73,8 @@ public class StateLookup implements Lookup<BlockState> {
 
         final class Substrate implements Bucket {
             private final KeyList wildcards = new KeyList();
-            private final Map<Identifier, Bucket> blocks = new LinkedHashMap<>();
-            private final Map<Identifier, Bucket> tags = new LinkedHashMap<>();
+            private final Map<ResourceLocation, Bucket> blocks = new LinkedHashMap<>();
+            private final Map<ResourceLocation, Bucket> tags = new LinkedHashMap<>();
 
             Substrate(String substrate) { }
 
@@ -103,9 +103,9 @@ public class StateLookup implements Lookup<BlockState> {
             }
 
             private Bucket getTile(BlockState state) {
-                return blocks.computeIfAbsent(Registry.BLOCK.getId(state.getBlock()), id -> {
-                    for (Identifier tag : tags.keySet()) {
-                        if (state.isIn(TagKey.of(Registry.BLOCK_KEY, tag))) {
+                return blocks.computeIfAbsent(Registry.BLOCK.getKey(state.getBlock()), id -> {
+                    for (ResourceLocation tag : tags.keySet()) {
+                        if (state.is(TagKey.create(Registry.BLOCK_REGISTRY, tag))) {
                             return tags.get(tag);
                         }
                     }
@@ -119,7 +119,7 @@ public class StateLookup implements Lookup<BlockState> {
             private final Map<BlockState, Key> cache = new LinkedHashMap<>();
             private final KeyList keys = new KeyList();
 
-            Tile(Identifier id) { }
+            Tile(ResourceLocation id) { }
 
             @Override
             public void add(Key key) {
@@ -170,7 +170,7 @@ public class StateLookup implements Lookup<BlockState> {
     private static final class Key {
         public static final Key NULL = new Key();
 
-        public final Identifier identifier;
+        public final ResourceLocation identifier;
 
         public final String substrate;
 
@@ -185,7 +185,7 @@ public class StateLookup implements Lookup<BlockState> {
         public final boolean isWildcard;
 
         private Key() {
-            identifier = new Identifier("air");
+            identifier = new ResourceLocation("air");
             substrate = "";
             properties = Collections.emptySet();
             value = Emitter.UNASSIGNED;
@@ -213,17 +213,17 @@ public class StateLookup implements Lookup<BlockState> {
 
             if (!isWildcard) {
                 if (id.indexOf('^') > -1) {
-                    identifier = new Identifier(id.split("\\^")[0]);
+                    identifier = new ResourceLocation(id.split("\\^")[0]);
                     PresenceFootsteps.logger.warn("Metadata entry for " + key + "=" + value + " was ignored");
                 } else {
-                    identifier = new Identifier(id);
+                    identifier = new ResourceLocation(id);
                 }
 
-                if (!isTag && !Registry.BLOCK.containsId(identifier)) {
+                if (!isTag && !Registry.BLOCK.containsKey(identifier)) {
                     PresenceFootsteps.logger.warn("Sound registered for unknown block id " + identifier);
                 }
             } else {
-                identifier = new Identifier("air");
+                identifier = new ResourceLocation("air");
             }
 
             key = key.replace(id, "");
@@ -252,7 +252,7 @@ public class StateLookup implements Lookup<BlockState> {
                 return true;
             }
 
-            Map<Property<?>, Comparable<?>> entries = state.getEntries();
+            Map<Property<?>, Comparable<?>> entries = state.getValues();
             Set<Property<?>> keys = entries.keySet();
 
             for (Attribute property : properties) {

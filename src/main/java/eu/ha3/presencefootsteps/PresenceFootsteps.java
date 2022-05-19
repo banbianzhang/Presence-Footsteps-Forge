@@ -8,7 +8,7 @@ import org.apache.logging.log4j.Logger;
 import org.lwjgl.glfw.GLFW;
 
 import com.minelittlepony.common.util.GamePaths;
-
+import com.mojang.blaze3d.platform.InputConstants;
 import eu.ha3.mc.quick.update.TargettedVersion;
 import eu.ha3.mc.quick.update.UpdateChecker;
 import eu.ha3.mc.quick.update.UpdaterConfig;
@@ -17,13 +17,12 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.option.KeyBinding;
-import net.minecraft.client.toast.SystemToast;
-import net.minecraft.client.toast.ToastManager;
-import net.minecraft.client.util.InputUtil;
-import net.minecraft.resource.ResourceType;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.client.KeyMapping;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.toasts.SystemToast;
+import net.minecraft.client.gui.components.toasts.ToastComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.server.packs.PackType;
 
 public class PresenceFootsteps implements ClientModInitializer {
     public static final Logger logger = LogManager.getLogger("PFSolver");
@@ -45,7 +44,7 @@ public class PresenceFootsteps implements ClientModInitializer {
 
     private UpdateChecker updater;
 
-    private KeyBinding keyBinding;
+    private KeyMapping keyBinding;
 
     public PresenceFootsteps() {
         instance = this;
@@ -76,7 +75,7 @@ public class PresenceFootsteps implements ClientModInitializer {
         config = new PFConfig(pfFolder.resolve("userconfig.json"), this);
         config.load();
 
-        keyBinding = new KeyBinding("presencefootsteps.settings.key", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_F10, "key.categories.misc");
+        keyBinding = new KeyMapping("presencefootsteps.settings.key", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_F10, "key.categories.misc");
 
         KeyBindingHelper.registerKeyBinding(keyBinding);
 
@@ -84,13 +83,13 @@ public class PresenceFootsteps implements ClientModInitializer {
         debugHud = new PFDebugHud(engine);
 
         ClientTickEvents.END_CLIENT_TICK.register(this::onTick);
-        ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(engine);
+        ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(engine);
     }
 
-    private void onTick(MinecraftClient client) {
+    private void onTick(Minecraft client) {
         Optional.ofNullable(client.getCameraEntity()).filter(e -> !e.isRemoved()).ifPresent(cameraEntity -> {
-            if (keyBinding.isPressed() && client.currentScreen == null) {
-                client.setScreen(new PFOptionsScreen(client.currentScreen));
+            if (keyBinding.isDown() && client.screen == null) {
+                client.setScreen(new PFOptionsScreen(client.screen));
             }
 
             engine.onFrame(client, cameraEntity);
@@ -99,10 +98,10 @@ public class PresenceFootsteps implements ClientModInitializer {
     }
 
     private void onUpdate(TargettedVersion newVersion, TargettedVersion currentVersion) {
-        ToastManager manager = MinecraftClient.getInstance().getToastManager();
+        ToastComponent manager = Minecraft.getInstance().getToasts();
 
-        SystemToast.add(manager, SystemToast.Type.TUTORIAL_HINT,
-                new TranslatableText("pf.update.title"),
-                new TranslatableText("pf.update.text", newVersion.version().getFriendlyString(), newVersion.minecraft().getFriendlyString()));
+        SystemToast.add(manager, SystemToast.SystemToastIds.TUTORIAL_HINT,
+                new TranslatableComponent("pf.update.title"),
+                new TranslatableComponent("pf.update.text", newVersion.version().getFriendlyString(), newVersion.minecraft().getFriendlyString()));
     }
 }

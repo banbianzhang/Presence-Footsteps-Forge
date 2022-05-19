@@ -3,7 +3,7 @@ package eu.ha3.presencefootsteps.sound.acoustics;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
+import net.minecraft.world.entity.Entity;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -12,7 +12,6 @@ import com.google.gson.JsonParseException;
 import eu.ha3.presencefootsteps.sound.Options;
 import eu.ha3.presencefootsteps.sound.State;
 import eu.ha3.presencefootsteps.sound.player.SoundPlayer;
-import net.minecraft.entity.Entity;
 
 /**
  *

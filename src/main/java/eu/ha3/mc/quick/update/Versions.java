@@ -6,7 +6,6 @@ import java.util.List;
 import com.google.gson.JsonObject;
 
 import net.fabricmc.loader.api.VersionParsingException;
-import net.minecraft.util.JsonHelper;
 
 public record Versions (
         TargettedVersion latest,

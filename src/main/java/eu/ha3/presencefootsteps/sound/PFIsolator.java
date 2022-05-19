@@ -15,10 +15,10 @@ import eu.ha3.presencefootsteps.world.PFSolver;
 import eu.ha3.presencefootsteps.world.PrimitiveLookup;
 import eu.ha3.presencefootsteps.world.Solver;
 import eu.ha3.presencefootsteps.world.StateLookup;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.sound.BlockSoundGroup;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class PFIsolator implements Isolator {
     private final Variator variator = new Variator();
@@ -29,7 +29,7 @@ public class PFIsolator implements Isolator {
 
     private final Lookup<BlockState> blockMap = new StateLookup();
 
-    private final Lookup<BlockSoundGroup> primitiveMap = new PrimitiveLookup();
+    private final Lookup<SoundType> primitiveMap = new PrimitiveLookup();
 
     private final ImmediateSoundPlayer player;
     private final AcousticsPlayer acoustics;
@@ -67,7 +67,7 @@ public class PFIsolator implements Isolator {
     }
 
     @Override
-    public Lookup<BlockSoundGroup> getPrimitiveMap() {
+    public Lookup<SoundType> getPrimitiveMap() {
         return primitiveMap;
     }
 
