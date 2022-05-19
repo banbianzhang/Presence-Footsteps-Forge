@@ -167,7 +167,7 @@ public class StateLookup implements Lookup<BlockState> {
         }
     }
 
-    private static final class Key {
+    static final class Key {
         public static final Key NULL = new Key();
 
         public final ResourceLocation identifier;
@@ -302,7 +302,7 @@ public class StateLookup implements Lookup<BlockState> {
                     && Objects.equals(properties, other.properties);
         }
 
-        private static record Attribute (String name, String value) {
+        static record Attribute (String name, String value) {
             Attribute(String prop) {
                 this(prop.split("="));
             }
