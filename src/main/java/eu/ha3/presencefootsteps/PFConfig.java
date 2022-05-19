@@ -9,7 +9,7 @@ public class PFConfig extends JsonFile {
 
     private int volume = 70;
 
-    private String stance = "UNKNOWN";
+    private String stance = "BIPED";
 
     private boolean multiplayer = true;
 

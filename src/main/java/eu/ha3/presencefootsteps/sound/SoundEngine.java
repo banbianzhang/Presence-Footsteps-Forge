@@ -69,19 +69,16 @@ public class SoundEngine implements PreparableReloadListener {
     }
 
     private Stream<? extends Entity> getTargets(Entity cameraEntity) {
-
-//        return cameraEntity.level.getEntities((Entity) null, cameraEntity.getBoundingBox().inflate(16), (Predicate<? super Entity>) e -> {
-//            return e instanceof LivingEntity
-//                    && !(e instanceof WaterAnimal)
-//                    && !(e instanceof FlyingMob)
-//                    && !e.isPassenger()
-//                    && !((LivingEntity)e).isSleeping()
-//                    && (!(e instanceof Player) || !((Player)e).isSpectator())
-//                    && e.distanceTo(cameraEntity) <= 16
-//                    && (config.getEnabledGlobal() || (e instanceof Player));
-//        }).stream();
-
-        return cameraEntity.level.players().stream();
+        return cameraEntity.level.getEntities((Entity) null, cameraEntity.getBoundingBox().inflate(16), (Predicate<? super Entity>) e -> {
+            return e instanceof LivingEntity
+                    && !(e instanceof WaterAnimal)
+                    && !(e instanceof FlyingMob)
+                    && !e.isPassenger()
+                    && !((LivingEntity)e).isSleeping()
+                    && (!(e instanceof Player) || !((Player)e).isSpectator())
+                    && e.distanceTo(cameraEntity) <= 16
+                    && (config.getEnabledGlobal() || (e instanceof Player));
+        }).stream();
     }
 
     public void onFrame(Minecraft client, Entity cameraEntity) {

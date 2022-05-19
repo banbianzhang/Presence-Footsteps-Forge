@@ -1,17 +1,14 @@
 package eu.ha3.presencefootsteps.events;
 
 import com.minelittlepony.common.util.GamePaths;
-import com.mojang.blaze3d.platform.InputConstants;
 import eu.ha3.presencefootsteps.PFConfig;
 import eu.ha3.presencefootsteps.PFDebugHud;
 import eu.ha3.presencefootsteps.PresenceFootsteps;
 import eu.ha3.presencefootsteps.sound.SoundEngine;
-import net.minecraft.client.KeyMapping;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import org.lwjgl.glfw.GLFW;
 
 import java.nio.file.Path;
 
@@ -33,7 +30,7 @@ public class ModLifecycleEventSubscriber {
 //        KeyBindingHelper.registerKeyBinding(keyBinding);
 
         PresenceFootsteps.getInstance().engine = new SoundEngine(PresenceFootsteps.getInstance().getConfig());
-        PresenceFootsteps.getInstance().debugHud = new PFDebugHud(PresenceFootsteps.getInstance().engine);
+//        PresenceFootsteps.getInstance().debugHud = new PFDebugHud(PresenceFootsteps.getInstance().engine);
 
         PresenceFootsteps.getInstance().getEngine().reload();
 

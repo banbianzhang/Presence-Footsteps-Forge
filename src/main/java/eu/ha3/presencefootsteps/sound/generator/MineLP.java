@@ -20,21 +20,21 @@ public class MineLP {
         return hasMineLP;
     }
 
-    public static Locomotion getLocomotion(Entity entity, Locomotion fallback) {
-
-        ResourceLocation texture = Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(entity).getTextureLocation(entity);
-
+//    public static Locomotion getLocomotion(Entity entity, Locomotion fallback) {
+//
+//        ResourceLocation texture = Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(entity).getTextureLocation(entity);
+//
 //        Race race = MineLittlePony.getInstance().getManager().getPony(texture).getRace(false);
-
+//
 //        if (race.isHuman()) {
-            return fallback;
+//            return fallback;
 //        }
-
+//
 //        return race.hasWings() ? Locomotion.FLYING : Locomotion.QUADRUPED;
-    }
+//    }
 
-    public static Locomotion getLocomotion(Player ply) {
-        return Locomotion.BIPED;
+//    public static Locomotion getLocomotion(Player ply) {
+//        return Locomotion.BIPED;
 //        return MineLittlePony.getInstance().getManager().getPony(ply).canFly() ? Locomotion.FLYING : Locomotion.QUADRUPED;
-    }
+//    }
 }

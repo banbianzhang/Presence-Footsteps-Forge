@@ -17,6 +17,12 @@ archivesBaseName = project.name
 
 loom {
     mixin.defaultRefmapName = 'presencefootsteps.mixin.refmap.json'
+
+    forge {
+        mixinConfigs = [
+            'presencefootsteps.mixin.json'
+        ]
+    }
 }
 
 reckon {

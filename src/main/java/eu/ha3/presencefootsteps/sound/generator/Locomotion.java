@@ -53,22 +53,15 @@ public enum Locomotion {
     }
 
     public static Locomotion forLiving(Entity entity, Locomotion fallback) {
-        if (MineLP.hasPonies()) {
-            return MineLP.getLocomotion(entity, fallback);
-        }
+//        if (MineLP.hasPonies()) {
+//            return MineLP.getLocomotion(entity, fallback);
+//        }
 
         return fallback;
     }
 
     public static Locomotion forPlayer(Player ply, Locomotion preference) {
-        if (preference == NONE) {
-            if (ply instanceof LocalPlayer && MineLP.hasPonies()) {
-                return MineLP.getLocomotion(ply);
-            }
-
-            return Locomotion.BIPED;
-        }
-
-        return preference;
+        if (preference == NONE) return Locomotion.BIPED;
+        else return preference;
     }
 }
