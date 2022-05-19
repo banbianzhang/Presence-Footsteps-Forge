@@ -2,8 +2,12 @@ package eu.ha3.presencefootsteps.sound;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.server.packs.resources.PreparableReloadListener;
+import net.minecraft.world.level.entity.EntityTypeTest;
 import org.jetbrains.annotations.Nullable;
 
 import eu.ha3.presencefootsteps.PFConfig;
@@ -12,7 +16,7 @@ import eu.ha3.presencefootsteps.sound.acoustics.AcousticsJsonParser;
 import eu.ha3.presencefootsteps.sound.generator.Locomotion;
 import eu.ha3.presencefootsteps.sound.generator.StepSoundGenerator;
 import eu.ha3.presencefootsteps.util.ResourceUtils;
-import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
+//import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -26,7 +30,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.animal.WaterAnimal;
 import net.minecraft.world.entity.player.Player;
 
-public class SoundEngine implements IdentifiableResourceReloadListener {
+public class SoundEngine implements PreparableReloadListener {
     private static final ResourceLocation BLOCK_MAP = new ResourceLocation("presencefootsteps", "config/blockmap.json");
     private static final ResourceLocation GOLEM_MAP = new ResourceLocation("presencefootsteps", "config/golemmap.json");
     private static final ResourceLocation LOCOMOTION_MAP = new ResourceLocation("presencefootsteps", "config/locomotionmap.json");
@@ -65,16 +69,19 @@ public class SoundEngine implements IdentifiableResourceReloadListener {
     }
 
     private Stream<? extends Entity> getTargets(Entity cameraEntity) {
-        return cameraEntity.level.getEntities((Entity) null, cameraEntity.getBoundingBox().inflate(16), e -> {
-            return e instanceof LivingEntity
-                    && !(e instanceof WaterAnimal)
-                    && !(e instanceof FlyingMob)
-                    && !e.isPassenger()
-                    && !((LivingEntity)e).isSleeping()
-                    && (!(e instanceof Player) || !((Player)e).isSpectator())
-                    && e.distanceTo(cameraEntity) <= 16
-                    && (config.getEnabledGlobal() || (e instanceof Player));
-        }).stream();
+
+//        return cameraEntity.level.getEntities((Entity) null, cameraEntity.getBoundingBox().inflate(16), (Predicate<? super Entity>) e -> {
+//            return e instanceof LivingEntity
+//                    && !(e instanceof WaterAnimal)
+//                    && !(e instanceof FlyingMob)
+//                    && !e.isPassenger()
+//                    && !((LivingEntity)e).isSleeping()
+//                    && (!(e instanceof Player) || !((Player)e).isSpectator())
+//                    && e.distanceTo(cameraEntity) <= 16
+//                    && (config.getEnabledGlobal() || (e instanceof Player));
+//        }).stream();
+
+        return cameraEntity.level.players().stream();
     }
 
     public void onFrame(Minecraft client, Entity cameraEntity) {
@@ -118,10 +125,10 @@ public class SoundEngine implements IdentifiableResourceReloadListener {
         return isolator.getLocomotionMap().lookup(entity);
     }
 
-    @Override
-    public ResourceLocation getFabricId() {
-        return ID;
-    }
+//    @Override
+//    public ResourceLocation getFabricId() {
+//        return ID;
+//    }
 
     @Override
     public CompletableFuture<Void> reload(PreparationBarrier sync, ResourceManager sender,

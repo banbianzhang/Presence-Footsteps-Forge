@@ -18,9 +18,6 @@
   "entrypoints": {
     "client": [
       "eu.ha3.presencefootsteps.PresenceFootsteps"
-    ],
-    "modmenu": [
-      "eu.ha3.presencefootsteps.PFModMenuFactory"
     ]
   },
   "mixins": [
@@ -28,13 +25,6 @@
   ],
   "depends": {
     "fabricloader": ">=0.12.0",
-    "java": ">=17",
-    "fabric-api-base": ">=0.1.0",
-    "fabric-lifecycle-events-v1": ">=0.1.0",
-    "fabric-resource-loader-v0": ">=0.1.0",
-    "kirin": "*"
-  },
-  "suggests": {
-    "minelp": "*"
+    "java": ">=17"
   }
 }

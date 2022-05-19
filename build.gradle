@@ -1,6 +1,6 @@
 plugins {
     id 'java-library'
-    id 'fabric-loom' version '0.11-SNAPSHOT'
+    id 'dev.architectury.loom' version '0.11.0-SNAPSHOT'
     id 'maven-publish'
     id 'org.ajoberstar.reckon' version '0.13.0'
 }
@@ -42,18 +42,21 @@ repositories {
 dependencies {
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     mappings loom.officialMojangMappings()
-    modApi "net.fabricmc:fabric-loader:${project.loader_version}"
 
-    modApi fabricApi.module("fabric-api-base", project.fabric_version)
-    modApi fabricApi.module("fabric-lifecycle-events-v1", project.fabric_version)
-    modApi fabricApi.module("fabric-key-binding-api-v1", project.fabric_version)
-    modApi fabricApi.module("fabric-resource-loader-v0", project.fabric_version)
+    forge "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
-    modApi "com.minelittlepony:kirin:${project.kirin_version}"
-    include "com.minelittlepony:kirin:${project.kirin_version}"
+//    modApi "net.fabricmc:fabric-loader:${project.loader_version}"
+//
+//    modApi fabricApi.module("fabric-api-base", project.fabric_version)
+//    modApi fabricApi.module("fabric-lifecycle-events-v1", project.fabric_version)
+////    modApi fabricApi.module("fabric-key-binding-api-v1", project.fabric_version)
+//    modApi fabricApi.module("fabric-resource-loader-v0", project.fabric_version)
 
-    modImplementation "com.minelittlepony:minelittlepony:${project.minelp_version}"
-    modCompileOnly("com.terraformersmc:modmenu:${project.modmenu_version}")
+//    modApi "com.minelittlepony:kirin:${project.kirin_version}"
+//    include "com.minelittlepony:kirin:${project.kirin_version}"
+//
+//    modImplementation "com.minelittlepony:minelittlepony:${project.minelp_version}"
+//    modCompileOnly("com.terraformersmc:modmenu:${project.modmenu_version}")
 }
 
 processResources {

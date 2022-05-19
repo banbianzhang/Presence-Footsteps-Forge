@@ -1,0 +1,25 @@
+modLoader = "javafml"
+loaderVersion = "[40,)"
+license = "MIT"
+
+[[mods]]
+modId = "presencefootsteps"
+version = "1.0.0"
+displayName = "Presence Footsteps (Forge)"
+description = '''
+A port of Presence Footsteps to Forge.
+'''
+
+[[dependencies.presencefootsteps]]
+modId = "forge"
+mandatory = true
+versionRange = "[40.1.0,)"
+ordering = "NONE"
+side = "CLIENT"
+
+[[dependencies.presencefootsteps]]
+modId = "minecraft"
+mandatory = true
+versionRange = "[1.18.2,)"
+ordering = "NONE"
+side = "CLIENT"

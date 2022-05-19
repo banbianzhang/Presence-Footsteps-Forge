@@ -13,7 +13,7 @@ import com.minelittlepony.common.client.gui.element.EnumSlider;
 import com.minelittlepony.common.client.gui.element.Label;
 import com.minelittlepony.common.client.gui.element.Slider;
 import com.mojang.blaze3d.vertex.PoseStack;
-import eu.ha3.mc.quick.update.Versions;
+//import eu.ha3.mc.quick.update.Versions;
 import eu.ha3.presencefootsteps.util.BlockReport;
 
 class PFOptionsScreen extends GameGui {
@@ -32,13 +32,13 @@ class PFOptionsScreen extends GameGui {
         addButton(new Label(width / 2, 30)).setCentered().getStyle()
                 .setText(getTitle());
 
-        redrawUpdateButton(addButton(new Button(width - 45, 20, 25, 20)).onClick(sender -> {
-            sender.setEnabled(false);
-            sender.getStyle().setTooltip("pf.update.checking");
-            PresenceFootsteps.getInstance().getUpdateChecker().checkNow().thenAccept(newVersions -> {
-                redrawUpdateButton(sender);
-            });
-        }));
+//        redrawUpdateButton(addButton(new Button(width - 45, 20, 25, 20)).onClick(sender -> {
+//            sender.setEnabled(false);
+//            sender.getStyle().setTooltip("pf.update.checking");
+//            PresenceFootsteps.getInstance().getUpdateChecker().checkNow().thenAccept(newVersions -> {
+//                redrawUpdateButton(sender);
+//            });
+//        }));
 
         addButton(new Slider(left, row, 0, 100, config.getVolume()))
             .onChange(config::setVolume)
@@ -87,21 +87,6 @@ class PFOptionsScreen extends GameGui {
     public void render(PoseStack matrices, int mouseX, int mouseY, float partialTicks) {
         renderBackground(matrices);
         super.render(matrices, mouseX, mouseY, partialTicks);
-    }
-
-    private void redrawUpdateButton(Button button) {
-        Optional<Versions> versions = PresenceFootsteps.getInstance().getUpdateChecker().getNewer();
-        boolean hasUpdate = versions.isPresent();
-        button.setEnabled(true);
-        button.getStyle()
-           .setText(hasUpdate ? "!" : ":)")
-           .setColor(hasUpdate ? 0xAAFF00 : 0xFFFFFF)
-           .setTooltip(versions
-                   .map(Versions::latest)
-                   .map(latest -> (Component)new TranslatableComponent("pf.update.updates_available",
-                           latest.version().getFriendlyString(),
-                           latest.minecraft().getFriendlyString()))
-                   .orElse(new TranslatableComponent("pf.update.up_to_date")));
     }
 
     private Component formatVolume(AbstractSlider<Float> slider) {
