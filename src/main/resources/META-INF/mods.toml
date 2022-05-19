@@ -6,14 +6,16 @@ license = "MIT"
 modId = "presencefootsteps"
 version = "1.0.0"
 displayName = "Presence Footsteps (Forge)"
+authors = "Hurricaaane, Sollace, Paint_Ninja"
+logoFile="presencefootsteps_logo.png"
 description = '''
-A port of Presence Footsteps to Forge.
+An overly complicated sound mod.
 '''
 
 [[dependencies.presencefootsteps]]
 modId = "forge"
 mandatory = true
-versionRange = "[40.1.0,)"
+versionRange = "[40.1.20,)"
 ordering = "NONE"
 side = "CLIENT"
 
