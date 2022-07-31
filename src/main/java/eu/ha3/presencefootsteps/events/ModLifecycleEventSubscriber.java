@@ -2,7 +2,6 @@ package eu.ha3.presencefootsteps.events;
 
 import com.minelittlepony.common.util.GamePaths;
 import eu.ha3.presencefootsteps.PFConfig;
-import eu.ha3.presencefootsteps.PFDebugHud;
 import eu.ha3.presencefootsteps.PresenceFootsteps;
 import eu.ha3.presencefootsteps.sound.SoundEngine;
 import net.minecraftforge.api.distmarker.Dist;

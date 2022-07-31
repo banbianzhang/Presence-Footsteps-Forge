@@ -1,32 +1,11 @@
 package eu.ha3.presencefootsteps;
 
-import java.nio.file.Path;
-import java.util.Optional;
-
-import com.minelittlepony.common.util.GamePaths;
+import eu.ha3.presencefootsteps.sound.SoundEngine;
+import net.minecraft.client.KeyMapping;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.lwjgl.glfw.GLFW;
-
-import com.mojang.blaze3d.platform.InputConstants;
-//import eu.ha3.mc.quick.update.TargettedVersion;
-//import eu.ha3.mc.quick.update.UpdateChecker;
-//import eu.ha3.mc.quick.update.UpdaterConfig;
-import eu.ha3.presencefootsteps.sound.SoundEngine;
-//import net.fabricmc.api.ClientModInitializer;
-//import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-////import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-//import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
-import net.minecraft.client.KeyMapping;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.toasts.SystemToast;
-import net.minecraft.client.gui.components.toasts.ToastComponent;
-import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.server.packs.PackType;
 
 @Mod(PresenceFootsteps.MOD_ID)
 public class PresenceFootsteps {
@@ -45,8 +24,6 @@ public class PresenceFootsteps {
 
     private PFConfig config;
 
-    public PFDebugHud debugHud;
-
 //    private UpdateChecker updater;
 
     public KeyMapping keyBinding;
@@ -54,10 +31,6 @@ public class PresenceFootsteps {
     public PresenceFootsteps() {
         instance = this;
         MinecraftForge.EVENT_BUS.register(this);
-    }
-
-    public PFDebugHud getDebugHud() {
-        return debugHud;
     }
 
     public SoundEngine getEngine() {

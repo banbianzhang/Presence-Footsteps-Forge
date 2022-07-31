@@ -5,7 +5,7 @@ issueTrackerURL = "https://github.com/PaintNinja/Presence-Footsteps-Forge"
 
 [[mods]]
 modId = "presencefootsteps"
-version = "1.18.2-1.5.0-beta1"
+version = "1.18.2-1.5.0-beta2"
 displayName = "Presence Footsteps (Forge)"
 displayURL = "https://www.curseforge.com/minecraft/mc-mods/presence-footsteps-forge"
 authors = "Hurricaaane, Sollace, Paint_Ninja"
@@ -15,7 +15,7 @@ description = "An overly complicated sound mod, ported to Forge."
 [[dependencies.presencefootsteps]]
 modId = "forge"
 mandatory = true
-versionRange = "[40.1.20,)"
+versionRange = "[40.1.46,)"
 ordering = "NONE"
 side = "CLIENT"
 
