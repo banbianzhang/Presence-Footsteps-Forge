@@ -76,7 +76,7 @@ public class PresenceFootsteps implements ClientModInitializer {
         config = new PFConfig(pfFolder.resolve("userconfig.json"), this);
         config.load();
 
-        keyBinding = new KeyBinding("presencefootsteps.settings.key", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_F10, "key.categories.misc");
+        keyBinding = new KeyBinding("key.presencefootsteps.settings", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_F10, "key.categories.misc");
 
         KeyBindingHelper.registerKeyBinding(keyBinding);
 
