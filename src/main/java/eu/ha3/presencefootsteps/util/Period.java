@@ -2,7 +2,9 @@ package eu.ha3.presencefootsteps.util;
 
 import java.util.Random;
 
-public class Period {
+import eu.ha3.presencefootsteps.sound.Options;
+
+public class Period implements Options {
 
     public long min;
     public long max;
@@ -36,5 +38,18 @@ public class Period {
 
     public float on(float value) {
         return MathUtil.between(min, max, value);
+    }
+
+    @Override
+    public boolean containsKey(String option) {
+        return "delay_min".equals(option)
+            || "delay_max".equals(option);
+    }
+
+    @Override
+    public float get(String option) {
+        return "delay_min".equals(option) ? min
+             : "delay_max".equals(option) ? max
+             : 0;
     }
 }

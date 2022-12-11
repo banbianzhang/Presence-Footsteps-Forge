@@ -5,7 +5,7 @@ import com.google.gson.JsonObject;
 import eu.ha3.presencefootsteps.sound.Options;
 import eu.ha3.presencefootsteps.util.Period;
 
-class DelayedAcoustic extends VaryingAcoustic implements Options {
+class DelayedAcoustic extends VaryingAcoustic {
 
     private final Period delay = new Period(0);
 
@@ -21,19 +21,6 @@ class DelayedAcoustic extends VaryingAcoustic implements Options {
 
     @Override
     protected Options getOptions() {
-        return this;
-    }
-
-    @Override
-    public boolean containsKey(Object option) {
-        return "delay_min".equals(option)
-            || "delay_max".equals(option);
-    }
-
-    @Override
-    public float get(String option) {
-        return "delay_min".equals(option) ? delay.min
-             : "delay_max".equals(option) ? delay.max
-             : 0;
+        return delay;
     }
 }
