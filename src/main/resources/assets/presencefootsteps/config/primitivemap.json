@@ -1,5 +1,5 @@
 {
-	"minecraft:block.honey_block.step": "honey",
+    "minecraft:block.honey_block.step": "honey",
     "minecraft:block.pointed_dripstone.step": "ore",
     "minecraft:block.spore_blossom.step": "NOT_EMITTER",
     "minecraft:block.anvil.step": "metalcompressed,hardmetal",
@@ -32,6 +32,7 @@
     "minecraft:block.soul_soil.step": "souls",
     "minecraft:block.bone_block.step": "bone",
     "minecraft:block.stone.step@1.00_1.50": "hardmetal",
+    "minecraft:block.metal.step@1.00_1.50": "hardmetal",
     "minecraft:block.stone.step": "brickstone",
     "minecraft:block.tuff.step": "stone",
     "minecraft:block.slime_block.step": "mud,slime",
@@ -75,5 +76,6 @@
     "minecraft:block.muddy_mangrove_roots.step": "mud,slick",
     "minecraft:block.deepslate_tiles.step": "brickstone",
     "minecraft:block.coral_block.step": "organic",
-    "minecraft:block.polished_deepslate.step": "rough_slate"
+    "minecraft:block.polished_deepslate.step": "rough_slate",
+    "minecraft:block.nether_wood.step": "wood,mushroom"
 }
