@@ -24,8 +24,8 @@ public class PFDebugHud {
         if (blockHit.getType() == HitResult.Type.BLOCK) {
             BlockState state = client.world.getBlockState(((BlockHitResult)blockHit).getBlockPos());
 
-
-            renderSoundList("Primitive: " + state.getSoundGroup().getStepSound().getId(),
+            renderSoundList("Primitive: " + state.getSoundGroup().getStepSound().getId()
+                    + "@" + String.format(Locale.ENGLISH, "%.2f_%.2f", state.getSoundGroup().volume, state.getSoundGroup().pitch),
                     engine.getIsolator().getPrimitiveMap().getAssociations(state.getSoundGroup()),
                     list);
 
