@@ -1,14 +1,13 @@
 package eu.ha3.presencefootsteps.sound.acoustics;
 
 import java.util.*;
-
+import net.minecraft.world.entity.LivingEntity;
 import com.google.common.base.Strings;
 
 import eu.ha3.presencefootsteps.PresenceFootsteps;
 import eu.ha3.presencefootsteps.sound.State;
 import eu.ha3.presencefootsteps.sound.Options;
 import eu.ha3.presencefootsteps.sound.player.SoundPlayer;
-import net.minecraft.entity.LivingEntity;
 
 public class AcousticsPlayer implements AcousticLibrary {
 

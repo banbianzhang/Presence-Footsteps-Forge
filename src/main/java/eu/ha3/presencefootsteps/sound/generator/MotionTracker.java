@@ -2,9 +2,9 @@ package eu.ha3.presencefootsteps.sound.generator;
 
 import eu.ha3.presencefootsteps.sound.State;
 import eu.ha3.presencefootsteps.util.PlayerUtil;
-import net.minecraft.client.network.OtherClientPlayerEntity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.player.RemotePlayer;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.LivingEntity;
 
 public class MotionTracker {
     private double lastX;
@@ -47,9 +47,9 @@ public class MotionTracker {
      */
     public void simulateMotionData(LivingEntity ply) {
         if (PlayerUtil.isClientPlayer(ply)) {
-            motionX = ply.getVelocity().x;
-            motionY = ply.getVelocity().y;
-            motionZ = ply.getVelocity().z;
+            motionX = ply.getDeltaMovement().x;
+            motionY = ply.getDeltaMovement().y;
+            motionZ = ply.getDeltaMovement().z;
         } else {
             // Other players don't send their motion data so we have to make our own
             // approximations.
@@ -67,13 +67,13 @@ public class MotionTracker {
             lastZ = ply.getZ();
         }
 
-        if (ply instanceof OtherClientPlayerEntity) {
-            if (ply.world.getTime() % 1 == 0) {
+        if (ply instanceof RemotePlayer) {
+            if (ply.level.getGameTime() % 1 == 0) {
 
                 if (motionX != 0 || motionZ != 0) {
-                    ply.distanceTraveled += Math.sqrt(Math.pow(motionX, 2) + Math.pow(motionY, 2) + Math.pow(motionZ, 2)) * 0.8;
+                    ply.moveDist += Math.sqrt(Math.pow(motionX, 2) + Math.pow(motionY, 2) + Math.pow(motionZ, 2)) * 0.8;
                 } else {
-                    ply.distanceTraveled += Math.sqrt(Math.pow(motionX, 2) + Math.pow(motionZ, 2)) * 0.8;
+                    ply.moveDist += Math.sqrt(Math.pow(motionX, 2) + Math.pow(motionZ, 2)) * 0.8;
                 }
 
                 if (ply.isOnGround()) {
@@ -101,6 +101,6 @@ public class MotionTracker {
         generator.variator.RUNNING_RAMPUP_END = 0.022F;
         double relativeSpeed = getHorizontalSpeed() + (getMotionY() * getMotionY()) - generator.variator.RUNNING_RAMPUP_BEGIN;
         double maxSpeed = generator.variator.RUNNING_RAMPUP_END - generator.variator.RUNNING_RAMPUP_BEGIN;
-        return (float)MathHelper.clamp(relativeSpeed / maxSpeed, 0, 1);
+        return (float)Mth.clamp(relativeSpeed / maxSpeed, 0, 1);
     }
 }

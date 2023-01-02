@@ -1,10 +1,9 @@
 package eu.ha3.presencefootsteps.sound;
 
 import java.util.Optional;
-
+import net.minecraft.world.entity.LivingEntity;
 import eu.ha3.presencefootsteps.sound.generator.Locomotion;
 import eu.ha3.presencefootsteps.sound.generator.StepSoundGenerator;
-import net.minecraft.entity.LivingEntity;
 
 public interface StepSoundSource {
     Optional<StepSoundGenerator> getStepGenerator(SoundEngine engine);

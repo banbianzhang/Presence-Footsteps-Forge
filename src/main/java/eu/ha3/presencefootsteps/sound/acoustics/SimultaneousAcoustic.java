@@ -2,7 +2,7 @@ package eu.ha3.presencefootsteps.sound.acoustics;
 
 import java.util.ArrayList;
 import java.util.List;
-
+import net.minecraft.world.entity.LivingEntity;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -10,7 +10,6 @@ import com.google.gson.JsonObject;
 import eu.ha3.presencefootsteps.sound.Options;
 import eu.ha3.presencefootsteps.sound.State;
 import eu.ha3.presencefootsteps.sound.player.SoundPlayer;
-import net.minecraft.entity.LivingEntity;
 
 /**
  * An acoustic that plays multiple other acoustics all a the same time.

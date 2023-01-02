@@ -1,12 +1,11 @@
 package eu.ha3.presencefootsteps;
 
 import java.nio.file.Path;
-
+import net.minecraft.CrashReportCategory;
+import net.minecraft.util.Mth;
 import eu.ha3.presencefootsteps.config.EntitySelector;
 import eu.ha3.presencefootsteps.config.JsonFile;
 import eu.ha3.presencefootsteps.sound.generator.Locomotion;
-import net.minecraft.util.crash.CrashReportSection;
-import net.minecraft.util.math.MathHelper;
 
 public class PFConfig extends JsonFile {
 
@@ -16,7 +15,7 @@ public class PFConfig extends JsonFile {
     private int otherPlayerVolume = 100;
     private int runningVolumeIncrease = 0;
 
-    private String stance = "UNKNOWN";
+    private String stance = "BIPED";
 
     private boolean multiplayer = true;
 
@@ -79,19 +78,19 @@ public class PFConfig extends JsonFile {
     }
 
     public int getGlobalVolume() {
-        return MathHelper.clamp(volume, 0, 100);
+        return Mth.clamp(volume, 0, 100);
     }
 
     public int getClientPlayerVolume() {
-        return MathHelper.clamp(clientPlayerVolume, 0, 100);
+        return Mth.clamp(clientPlayerVolume, 0, 100);
     }
 
     public int getOtherPlayerVolume() {
-        return MathHelper.clamp(otherPlayerVolume, 0, 100);
+        return Mth.clamp(otherPlayerVolume, 0, 100);
     }
 
     public int getRunningVolumeIncrease() {
-        return MathHelper.clamp(runningVolumeIncrease, 0, 100);
+        return Mth.clamp(runningVolumeIncrease, 0, 100);
     }
 
     public float setGlobalVolume(float volume) {
@@ -125,11 +124,11 @@ public class PFConfig extends JsonFile {
         return getRunningVolumeIncrease();
     }
 
-    public void populateCrashReport(CrashReportSection section) {
-        section.add("PF Global Volume", volume);
-        section.add("PF User's Selected Stance", stance + " (" + getLocomotion() + ")");
-        section.add("Enabled Global", global);
-        section.add("Enabled Multiplayer", multiplayer);
+    public void populateCrashReport(CrashReportCategory section) {
+        section.setDetail("PF Global Volume", volume);
+        section.setDetail("PF User's Selected Stance", stance + " (" + getLocomotion() + ")");
+        section.setDetail("Enabled Global", global);
+        section.setDetail("Enabled Multiplayer", multiplayer);
     }
 
     private static int volumeScaleToInt(float volume) {
