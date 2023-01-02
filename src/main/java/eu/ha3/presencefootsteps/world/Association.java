@@ -1,15 +1,13 @@
 package eu.ha3.presencefootsteps.world;
 
 import java.util.Objects;
-
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.Material;
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.Material;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.sound.BlockSoundGroup;
-import net.minecraft.util.math.BlockPos;
 
 public class Association {
 
@@ -24,7 +22,7 @@ public class Association {
     private LivingEntity source;
 
     public Association() {
-        this(Blocks.AIR.getDefaultState(), BlockPos.ORIGIN);
+        this(Blocks.AIR.defaultBlockState(), BlockPos.ZERO);
     }
 
     public Association(BlockState state, BlockPos pos) {
@@ -78,8 +76,8 @@ public class Association {
         return pos;
     }
 
-    public BlockSoundGroup getSoundGroup() {
-        return blockState.getSoundGroup();
+    public SoundType getSoundGroup() {
+        return blockState.getSoundType();
     }
 
     public boolean dataEquals(Association other) {

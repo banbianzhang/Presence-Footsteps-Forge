@@ -2,15 +2,16 @@ package eu.ha3.presencefootsteps.sound.player;
 
 import java.util.Random;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.sound.PositionedSoundInstance;
-import net.minecraft.client.sound.SoundInstance;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.sound.BlockSoundGroup;
-import net.minecraft.util.Identifier;
+import eu.ha3.presencefootsteps.PresenceFootsteps;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.client.resources.sounds.SoundInstance;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.state.BlockState;
 import eu.ha3.presencefootsteps.util.PlayerUtil;
 import eu.ha3.presencefootsteps.sound.Options;
 import eu.ha3.presencefootsteps.sound.SoundEngine;
@@ -40,16 +41,16 @@ public class ImmediateSoundPlayer implements SoundPlayer, StepSoundPlayer {
 
     @Override
     public void playStep(Association assos) {
-        BlockSoundGroup soundType = assos.getSoundGroup();
+        SoundType soundType = assos.getSoundGroup();
 
         if (!assos.getMaterial().isLiquid() && soundType != null) {
-            BlockState beside = assos.getSource().world.getBlockState(assos.getPos().up());
+            BlockState beside = assos.getSource().level.getBlockState(assos.getPos().above());
 
             if (beside.getBlock() == Blocks.SNOW) {
-                soundType = Blocks.SNOW.getSoundGroup(beside);
+                soundType = Blocks.SNOW.getSoundType(beside);
             }
 
-            playAttenuatedSound(assos.getSource(), soundType.getStepSound().getId().toString(), soundType.getVolume() * 0.15F, soundType.getPitch());
+            playAttenuatedSound(assos.getSource(), soundType.getStepSound().getLocation().toString(), soundType.getVolume() * 0.15F, soundType.getPitch());
         }
     }
 
@@ -66,15 +67,15 @@ public class ImmediateSoundPlayer implements SoundPlayer, StepSoundPlayer {
     }
 
     private void playAttenuatedSound(LivingEntity location, String soundName, float volume, float pitch) {
-        MinecraftClient mc = MinecraftClient.getInstance();
-        double distance = mc.gameRenderer.getCamera().getPos().squaredDistanceTo(location.getPos());
+        Minecraft mc = Minecraft.getInstance();
+        double distance = mc.gameRenderer.getMainCamera().getPosition().distanceToSqr(location.position());
 
         volume *= engine.getVolumeForSource(location);
 
-        PositionedSoundInstance sound = new UncappedSoundInstance(soundName, volume, pitch, location);
+        SimpleSoundInstance sound = new UncappedSoundInstance(soundName, volume, pitch, location);
 
         if (distance > 100) {
-            mc.getSoundManager().play(sound, (int) Math.floor(Math.sqrt(distance) / 2));
+            mc.getSoundManager().playDelayed(sound, (int) Math.floor(Math.sqrt(distance) / 2));
         } else {
             mc.getSoundManager().play(sound);
         }
@@ -85,12 +86,12 @@ public class ImmediateSoundPlayer implements SoundPlayer, StepSoundPlayer {
         delayedPlayer.think();
     }
 
-    public static class UncappedSoundInstance extends PositionedSoundInstance {
+    public static class UncappedSoundInstance extends SimpleSoundInstance {
         public UncappedSoundInstance(String soundName, float volume, float pitch, Entity entity) {
             super(getSoundId(soundName, entity),
-                    entity.getSoundCategory(),
-                    volume, pitch, SoundInstance.createRandom(), false, 0,
-                    SoundInstance.AttenuationType.LINEAR,
+                    entity.getSoundSource(),
+                    volume, pitch, SoundInstance.createUnseededRandom(), false, 0,
+                    SoundInstance.Attenuation.LINEAR,
                     entity.getX(),
                     entity.getY(),
                     entity.getZ(),
@@ -101,18 +102,18 @@ public class ImmediateSoundPlayer implements SoundPlayer, StepSoundPlayer {
             return 3;
         }
 
-        private static Identifier getSoundId(String name, Entity location) {
+        private static ResourceLocation getSoundId(String name, Entity location) {
             if (name.indexOf(':') >= 0) {
-                return new Identifier(name);
+                return new ResourceLocation(name);
             }
 
-            String domain = "presencefootsteps";
+            String domain = PresenceFootsteps.MOD_ID;
 
             if (!PlayerUtil.isClientPlayer(location)) {
                 domain += "mono"; // Switch to mono if playing another player
             }
 
-            return new Identifier(domain, name);
+            return new ResourceLocation(domain, name);
         }
     }
 }

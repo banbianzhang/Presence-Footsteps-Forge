@@ -6,49 +6,48 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
-
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.block.BaseEntityBlock;
+import net.minecraft.world.level.block.BasePressurePlateBlock;
+import net.minecraft.world.level.block.BaseRailBlock;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.BushBlock;
+import net.minecraft.world.level.block.CarpetBlock;
+import net.minecraft.world.level.block.DoublePlantBlock;
+import net.minecraft.world.level.block.FallingBlock;
+import net.minecraft.world.level.block.HalfTransparentBlock;
+import net.minecraft.world.level.block.HorizontalDirectionalBlock;
+import net.minecraft.world.level.block.InfestedBlock;
+import net.minecraft.world.level.block.IronBarsBlock;
+import net.minecraft.world.level.block.LeavesBlock;
+import net.minecraft.world.level.block.LiquidBlock;
+import net.minecraft.world.level.block.PipeBlock;
+import net.minecraft.world.level.block.SlabBlock;
+import net.minecraft.world.level.block.SnowyDirtBlock;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.SpreadingSnowyDirtBlock;
+import net.minecraft.world.level.block.StairBlock;
+import net.minecraft.world.level.block.TorchBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.fml.loading.FMLPaths;
 import org.jetbrains.annotations.Nullable;
 
 import com.google.gson.stream.JsonWriter;
-import com.minelittlepony.common.util.GamePaths;
 
 import eu.ha3.presencefootsteps.PresenceFootsteps;
 import eu.ha3.presencefootsteps.world.Lookup;
-import net.minecraft.block.AbstractPressurePlateBlock;
-import net.minecraft.block.AbstractRailBlock;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.BlockWithEntity;
-import net.minecraft.block.CarpetBlock;
-import net.minecraft.block.ConnectingBlock;
-import net.minecraft.block.FallingBlock;
-import net.minecraft.block.FluidBlock;
-import net.minecraft.block.HorizontalFacingBlock;
-import net.minecraft.block.InfestedBlock;
-import net.minecraft.block.LeavesBlock;
-import net.minecraft.block.PaneBlock;
-import net.minecraft.block.PlantBlock;
-import net.minecraft.block.SlabBlock;
-import net.minecraft.block.SnowyBlock;
-import net.minecraft.block.SpreadableBlock;
-import net.minecraft.block.StairsBlock;
-import net.minecraft.block.TallPlantBlock;
-import net.minecraft.block.TorchBlock;
-import net.minecraft.block.TransparentBlock;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.registry.Registries;
-import net.minecraft.sound.BlockSoundGroup;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
 
 public class BlockReport {
     private final Path loc;
 
     public BlockReport(String baseName) {
-        loc = getUniqueFileName(GamePaths.getGameDirectory().resolve("presencefootsteps"), baseName, ".json");
+        loc = getUniqueFileName(FMLPaths.GAMEDIR.get().resolve(PresenceFootsteps.MOD_ID), baseName, ".json");
     }
 
     public CompletableFuture<?> execute(@Nullable Predicate<BlockState> filter) {
@@ -57,7 +56,7 @@ public class BlockReport {
                 writeReport(filter);
                 printResults();
             } catch (Exception e) {
-                addMessage(Text.translatable("pf.report.error", e.getMessage()).styled(s -> s.withColor(Formatting.RED)));
+                addMessage(Component.translatable("pf.report.error", e.getMessage()).withStyle(s -> s.withColor(ChatFormatting.RED)));
             }
         });
     }
@@ -71,19 +70,19 @@ public class BlockReport {
             writer.name("blocks");
             writer.beginObject();
 
-            Map<String, BlockSoundGroup> groups = new HashMap<>();
+            Map<String, SoundType> groups = new HashMap<>();
 
-            Registries.BLOCK.forEach(block -> {
-                BlockState state = block.getDefaultState();
+            BuiltInRegistries.BLOCK.forEach(block -> {
+                BlockState state = block.defaultBlockState();
 
                 try {
-                    var group = block.getDefaultState().getSoundGroup();
+                    var group = block.defaultBlockState().getSoundType();
                     if (group != null && group.getStepSound() != null) {
                         String substrate = String.format(Locale.ENGLISH, "%.2f_%.2f", group.volume, group.pitch);
-                        groups.put(group.getStepSound().getId().toString() + "@" + substrate, group);
+                        groups.put(group.getStepSound().getLocation().toString() + "@" + substrate, group);
                     }
                     if (filter == null || filter.test(state)) {
-                        writer.name(Registries.BLOCK.getId(block).toString());
+                        writer.name(BuiltInRegistries.BLOCK.getKey(block).toString());
                         writer.beginObject();
                         writer.name("class");
                         writer.value(getClassData(state));
@@ -100,9 +99,9 @@ public class BlockReport {
             writer.endObject();
             writer.name("unmapped_entities");
             writer.beginArray();
-            Registries.ENTITY_TYPE.forEach(type -> {
-                if (type.create(MinecraftClient.getInstance().world) instanceof LivingEntity) {
-                    Identifier id = Registries.ENTITY_TYPE.getId(type);
+            BuiltInRegistries.ENTITY_TYPE.forEach(type -> {
+                if (type.create(Minecraft.getInstance().level) instanceof LivingEntity) {
+                    ResourceLocation id = BuiltInRegistries.ENTITY_TYPE.getKey(type);
                     if (!PresenceFootsteps.getInstance().getEngine().getIsolator().getLocomotionMap().contains(id)) {
                         try {
                             writer.value(id.toString());
@@ -118,7 +117,7 @@ public class BlockReport {
             groups.values().forEach(group -> {
                 try {
                     String substrate = String.format(Locale.ENGLISH, "%.2f_%.2f", group.volume, group.pitch);
-                    writer.name(group.getStepSound().getId().toString() + "@" + substrate);
+                    writer.name(group.getStepSound().getLocation().toString() + "@" + substrate);
                     writer.value(PresenceFootsteps.getInstance().getEngine().getIsolator().getPrimitiveMap().getAssociation(group, substrate));
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -129,14 +128,14 @@ public class BlockReport {
         }
     }
 
-    private String getSoundData(@Nullable BlockSoundGroup group) {
+    private String getSoundData(@Nullable SoundType group) {
         if (group == null) {
             return "NULL";
         }
         if (group.getStepSound() == null) {
             return "NO_SOUND";
         }
-        return group.getStepSound().getId().getPath();
+        return group.getStepSound().getLocation().getPath();
     }
 
     private String getClassData(BlockState state) {
@@ -144,40 +143,40 @@ public class BlockReport {
 
         String soundName = "";
 
-        if (block instanceof AbstractPressurePlateBlock) soundName += ",EXTENDS_PRESSURE_PLATE";
-        if (block instanceof AbstractRailBlock) soundName += ",EXTENDS_RAIL";
-        if (block instanceof BlockWithEntity) soundName += ",EXTENDS_CONTAINER";
-        if (block instanceof FluidBlock) soundName += ",EXTENDS_LIQUID";
-        if (block instanceof PlantBlock) soundName += ",EXTENDS_PLANT";
-        if (block instanceof TallPlantBlock) soundName += ",EXTENDS_DOUBLE_PLANT";
-        if (block instanceof ConnectingBlock) soundName += ",EXTENDS_CONNECTED_PLANT";
+        if (block instanceof BasePressurePlateBlock) soundName += ",EXTENDS_PRESSURE_PLATE";
+        if (block instanceof BaseRailBlock) soundName += ",EXTENDS_RAIL";
+        if (block instanceof BaseEntityBlock) soundName += ",EXTENDS_CONTAINER";
+        if (block instanceof LiquidBlock) soundName += ",EXTENDS_LIQUID";
+        if (block instanceof BushBlock) soundName += ",EXTENDS_PLANT";
+        if (block instanceof DoublePlantBlock) soundName += ",EXTENDS_DOUBLE_PLANT";
+        if (block instanceof PipeBlock) soundName += ",EXTENDS_CONNECTED_PLANT";
         if (block instanceof LeavesBlock) soundName += ",EXTENDS_LEAVES";
         if (block instanceof SlabBlock) soundName += ",EXTENDS_SLAB";
-        if (block instanceof StairsBlock) soundName += ",EXTENDS_STAIRS";
-        if (block instanceof SnowyBlock) soundName += ",EXTENDS_SNOWY";
-        if (block instanceof SpreadableBlock) soundName += ",EXTENDS_SPREADABLE";
+        if (block instanceof StairBlock) soundName += ",EXTENDS_STAIRS";
+        if (block instanceof SnowyDirtBlock) soundName += ",EXTENDS_SNOWY";
+        if (block instanceof SpreadingSnowyDirtBlock) soundName += ",EXTENDS_SPREADABLE";
         if (block instanceof FallingBlock) soundName += ",EXTENDS_PHYSICALLY_FALLING";
-        if (block instanceof PaneBlock) soundName += ",EXTENDS_PANE";
-        if (block instanceof HorizontalFacingBlock) soundName += ",EXTENDS_PILLAR";
+        if (block instanceof IronBarsBlock) soundName += ",EXTENDS_PANE";
+        if (block instanceof HorizontalDirectionalBlock) soundName += ",EXTENDS_PILLAR";
         if (block instanceof TorchBlock) soundName += ",EXTENDS_TORCH";
         if (block instanceof CarpetBlock) soundName += ",EXTENDS_CARPET";
         if (block instanceof InfestedBlock) soundName += ",EXTENDS_INFESTED";
-        if (block instanceof TransparentBlock) soundName += ",EXTENDS_TRANSPARENT";
+        if (block instanceof HalfTransparentBlock) soundName += ",EXTENDS_TRANSPARENT";
 
         return soundName;
     }
 
     private void printResults() {
-        addMessage(Text.translatable("pf.report.save")
-                .append(Text.literal(loc.getFileName().toString()).styled(s -> s
+        addMessage(Component.translatable("pf.report.save")
+                .append(Component.literal(loc.getFileName().toString()).withStyle(s -> s
                     .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, loc.toString()))
-                    .withFormatting(Formatting.UNDERLINE)))
-                .styled(s -> s
-                    .withColor(Formatting.GREEN)));
+                    .applyFormat(ChatFormatting.UNDERLINE)))
+                .withStyle(s -> s
+                    .withColor(ChatFormatting.GREEN)));
     }
 
-    public static void addMessage(Text text) {
-        MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(text);
+    public static void addMessage(Component text) {
+        Minecraft.getInstance().gui.getChat().addMessage(text);
     }
 
     static Path getUniqueFileName(Path directory, String baseName, String ext) {

@@ -4,12 +4,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
-
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.resource.language.I18n;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.text.Text;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 
 public enum Locomotion {
     NONE,
@@ -44,16 +43,16 @@ public enum Locomotion {
         return constructor.get();
     }
 
-    public Text getOptionName() {
-        return Text.translatable("menu.pf.stance", Text.translatable(this == NONE ? AUTO_TRANSLATION_KEY : translationKey));
+    public Component getOptionName() {
+        return Component.translatable("menu.pf.stance", Component.translatable(this == NONE ? AUTO_TRANSLATION_KEY : translationKey));
     }
 
-    public Text getOptionTooltip() {
-        return Text.translatable(translationKey + ".tooltip");
+    public Component getOptionTooltip() {
+        return Component.translatable(translationKey + ".tooltip");
     }
 
     public String getDisplayName() {
-        return I18n.translate("pf.stance", I18n.translate(translationKey));
+        return I18n.get("pf.stance", I18n.get(translationKey));
     }
 
     public static Locomotion byName(String name) {
@@ -61,19 +60,11 @@ public enum Locomotion {
     }
 
     public static Locomotion forLiving(Entity entity, Locomotion fallback) {
-        if (MineLP.hasPonies()) {
-            return MineLP.getLocomotion(entity, fallback);
-        }
-
         return fallback;
     }
 
-    public static Locomotion forPlayer(PlayerEntity ply, Locomotion preference) {
+    public static Locomotion forPlayer(Player ply, Locomotion preference) {
         if (preference == NONE) {
-            if (ply instanceof ClientPlayerEntity && MineLP.hasPonies()) {
-                return MineLP.getLocomotion(ply);
-            }
-
             return Locomotion.BIPED;
         }
 
