@@ -1,6 +1,8 @@
 package com.minelittlepony.common.client.gui.element;
 
 import java.util.function.Consumer;
+
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -38,6 +40,8 @@ public class Button extends AbstractButton implements ITooltipped<Button>, IBoun
     private static final Consumer<Button> NONE = v -> {};
     @NotNull
     private Consumer<Button> action = NONE;
+
+    private boolean wasHovered;
 
     public Button(int x, int y) {
         this(x, y, 200, 20);
@@ -124,7 +128,13 @@ public class Button extends AbstractButton implements ITooltipped<Button>, IBoun
 
     @Override
     public void renderToolTip(PoseStack matrices, Screen parent, int mouseX, int mouseY) {
-        if (visible) {
+        final boolean hovered = this.isHoveredOrFocused();
+
+        if (hovered != wasHovered) {
+            wasHovered = hovered;
+        }
+
+        if (hovered && visible) {
             getStyle().getTooltip().ifPresent(tooltip -> {
                 parent.renderComponentTooltip(matrices, tooltip.getLines(), mouseX + getStyle().toolTipX, mouseY + getStyle().toolTipY);
             });

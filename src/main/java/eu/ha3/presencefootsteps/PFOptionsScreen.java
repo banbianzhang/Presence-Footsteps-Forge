@@ -1,6 +1,8 @@
 package eu.ha3.presencefootsteps;
 
 import java.util.function.Function;
+
+import net.minecraft.client.gui.components.Widget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
@@ -107,6 +109,10 @@ public class PFOptionsScreen extends GameGui {
     public void render(PoseStack matrices, int mouseX, int mouseY, float partialTicks) {
         renderBackground(matrices);
         super.render(matrices, mouseX, mouseY, partialTicks);
+        for (final Widget renderable : this.renderables) {
+            if (renderable instanceof final Button button)
+                button.renderToolTip(matrices, this, mouseX, mouseY);
+        }
     }
 
     private Component formatVolume(AbstractSlider<Float> slider) {

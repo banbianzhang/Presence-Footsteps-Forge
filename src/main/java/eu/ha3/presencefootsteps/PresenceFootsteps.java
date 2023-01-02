@@ -21,7 +21,7 @@ public class PresenceFootsteps {
         return instance;
     }
 
-    public SoundEngine engine;
+    private SoundEngine engine;
 
     private PFConfig config;
 
@@ -44,6 +44,10 @@ public class PresenceFootsteps {
 
     public SoundEngine getEngine() {
         return engine;
+    }
+
+    public void setEngine(final SoundEngine engine) {
+        this.engine = engine;
     }
 
     public PFConfig getConfig() {

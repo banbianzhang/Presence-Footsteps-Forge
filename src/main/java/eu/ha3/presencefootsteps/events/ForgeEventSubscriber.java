@@ -16,13 +16,14 @@ public class ForgeEventSubscriber {
 
     @SubscribeEvent
     public static void onClientTick(final TickEvent.ClientTickEvent event) {
+        if (event.phase != TickEvent.Phase.END) return;
         final Minecraft client = Minecraft.getInstance();
         Optional.ofNullable(client.getCameraEntity()).filter(e -> !e.isRemoved()).ifPresent(cameraEntity -> {
             if (client.screen == null && presenceFootsteps.keyBinding.get().isDown()) {
                 client.setScreen(new PFOptionsScreen(client.screen));
             }
 
-            presenceFootsteps.engine.onFrame(client, cameraEntity);
+            presenceFootsteps.getEngine().onFrame(client, cameraEntity);
         });
     }
 }

@@ -47,7 +47,7 @@ public class BlockReport {
     private final Path loc;
 
     public BlockReport(String baseName) {
-        loc = getUniqueFileName(FMLPaths.GAMEDIR.get().resolve("presencefootsteps"), baseName, ".json");
+        loc = getUniqueFileName(FMLPaths.GAMEDIR.get().resolve(PresenceFootsteps.MOD_ID), baseName, ".json");
     }
 
     public CompletableFuture<?> execute(@Nullable Predicate<BlockState> filter) {

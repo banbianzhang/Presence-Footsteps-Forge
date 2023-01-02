@@ -5,6 +5,7 @@ import java.util.concurrent.Executor;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import eu.ha3.presencefootsteps.PresenceFootsteps;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import org.jetbrains.annotations.Nullable;
 
@@ -35,14 +36,14 @@ import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.entity.vehicle.Boat;
 
 public class SoundEngine implements PreparableReloadListener {
-    private static final ResourceLocation BLOCK_MAP = new ResourceLocation("presencefootsteps", "config/blockmap.json");
-    private static final ResourceLocation GOLEM_MAP = new ResourceLocation("presencefootsteps", "config/golemmap.json");
-    private static final ResourceLocation LOCOMOTION_MAP = new ResourceLocation("presencefootsteps", "config/locomotionmap.json");
-    private static final ResourceLocation PRIMITIVE_MAP = new ResourceLocation("presencefootsteps", "config/primitivemap.json");
-    private static final ResourceLocation ACOUSTICS = new ResourceLocation("presencefootsteps", "config/acoustics.json");
-    private static final ResourceLocation VARIATOR = new ResourceLocation("presencefootsteps", "config/variator.json");
+    private static final ResourceLocation BLOCK_MAP = new ResourceLocation(PresenceFootsteps.MOD_ID, "config/blockmap.json");
+    private static final ResourceLocation GOLEM_MAP = new ResourceLocation(PresenceFootsteps.MOD_ID, "config/golemmap.json");
+    private static final ResourceLocation LOCOMOTION_MAP = new ResourceLocation(PresenceFootsteps.MOD_ID, "config/locomotionmap.json");
+    private static final ResourceLocation PRIMITIVE_MAP = new ResourceLocation(PresenceFootsteps.MOD_ID, "config/primitivemap.json");
+    private static final ResourceLocation ACOUSTICS = new ResourceLocation(PresenceFootsteps.MOD_ID, "config/acoustics.json");
+    private static final ResourceLocation VARIATOR = new ResourceLocation(PresenceFootsteps.MOD_ID, "config/variator.json");
 
-    private static final ResourceLocation ID = new ResourceLocation("presencefootsteps", "sounds");
+    private static final ResourceLocation ID = new ResourceLocation(PresenceFootsteps.MOD_ID, "sounds");
 
     private PFIsolator isolator = new PFIsolator(this);
 

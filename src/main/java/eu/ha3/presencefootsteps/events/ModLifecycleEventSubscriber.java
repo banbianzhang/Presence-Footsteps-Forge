@@ -7,11 +7,13 @@ import eu.ha3.presencefootsteps.PresenceFootsteps;
 import eu.ha3.presencefootsteps.sound.SoundEngine;
 import net.minecraft.client.KeyMapping;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
 import net.minecraftforge.common.util.Lazy;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLConstructModEvent;
 import net.minecraftforge.fml.loading.FMLPaths;
 import org.lwjgl.glfw.GLFW;
 
@@ -24,31 +26,28 @@ public class ModLifecycleEventSubscriber {
     private static final PresenceFootsteps presenceFootsteps = PresenceFootsteps.getInstance();
 
     @SubscribeEvent
-    public static void onInitializeClient(final FMLClientSetupEvent event) {
+    public static void onConstruct(final FMLConstructModEvent event) {
         logger.info("Presence Footsteps starting");
-        Path pfFolder = FMLPaths.CONFIGDIR.get().resolve("presencefootsteps");
+    }
 
+    @SubscribeEvent
+    public static void onRegisterClientReloadListeners(final RegisterClientReloadListenersEvent event) {
+        final Path pfFolder = FMLPaths.CONFIGDIR.get().resolve(PresenceFootsteps.MOD_ID);
         presenceFootsteps.setConfig(new PFConfig(pfFolder.resolve("userconfig.json"), presenceFootsteps));
         presenceFootsteps.getConfig().load();
-
-        initKeyBinding();
-
-        presenceFootsteps.engine = new SoundEngine(presenceFootsteps.getConfig());
-        presenceFootsteps.engine.reload();
-        presenceFootsteps.setDebugHud(new PFDebugHud(presenceFootsteps.engine));
-
-        //todo ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(engine);
+        presenceFootsteps.setEngine(new SoundEngine(presenceFootsteps.getConfig()));
+        event.registerReloadListener(presenceFootsteps.getEngine());
     }
 
     @SubscribeEvent
     public static void registerKeyBinding(RegisterKeyMappingsEvent event) {
-        initKeyBinding();
+        presenceFootsteps.keyBinding = Lazy.of(() ->
+                new KeyMapping("key.presencefootsteps.settings", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_F10, "key.categories.misc"));
         event.register(presenceFootsteps.keyBinding.get());
     }
 
-    private static void initKeyBinding() {
-        if (presenceFootsteps.keyBinding == null) {
-            presenceFootsteps.keyBinding = Lazy.of(() -> new KeyMapping("key.presencefootsteps.settings", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_F10, "key.categories.misc"));
-        }
+    @SubscribeEvent
+    public static void onInitializeClient(final FMLClientSetupEvent event) {
+        presenceFootsteps.setDebugHud(new PFDebugHud(presenceFootsteps.getEngine()));
     }
 }

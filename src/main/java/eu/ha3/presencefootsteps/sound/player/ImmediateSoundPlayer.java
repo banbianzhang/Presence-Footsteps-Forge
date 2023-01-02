@@ -1,6 +1,8 @@
 package eu.ha3.presencefootsteps.sound.player;
 
 import java.util.Random;
+
+import eu.ha3.presencefootsteps.PresenceFootsteps;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
@@ -105,7 +107,7 @@ public class ImmediateSoundPlayer implements SoundPlayer, StepSoundPlayer {
                 return new ResourceLocation(name);
             }
 
-            String domain = "presencefootsteps";
+            String domain = PresenceFootsteps.MOD_ID;
 
             if (!PlayerUtil.isClientPlayer(location)) {
                 domain += "mono"; // Switch to mono if playing another player
