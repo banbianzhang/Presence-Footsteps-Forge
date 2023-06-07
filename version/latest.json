@@ -1,9 +1,10 @@
 {
 	"latest": {
-		"minecraft": "1.19.4",
-		"version": "1.8.1"
+		"minecraft": "1.20.0",
+		"version": "1.9.0"
 	},
 	"previous": [
+    { "minecraft": "1.19.4", "version": "1.8.1" },
 		{ "minecraft": "1.19.4", "version": "1.8.0" },
 		{ "minecraft": "1.19.3", "version": "1.7.1" },
 		{ "minecraft": "1.19.3", "version": "1.7.0" },
