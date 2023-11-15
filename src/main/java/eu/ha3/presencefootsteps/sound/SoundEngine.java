@@ -18,36 +18,36 @@ import eu.ha3.presencefootsteps.sound.generator.Locomotion;
 import eu.ha3.presencefootsteps.util.PlayerUtil;
 import eu.ha3.presencefootsteps.util.ResourceUtils;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.decoration.ArmorStandEntity;
-import net.minecraft.entity.mob.FlyingEntity;
-import net.minecraft.entity.mob.ShulkerEntity;
-import net.minecraft.entity.mob.WaterCreatureEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.vehicle.AbstractMinecartEntity;
-import net.minecraft.entity.vehicle.BoatEntity;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.resource.ResourceManager;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.crash.CrashException;
-import net.minecraft.util.crash.CrashReport;
-import net.minecraft.util.crash.CrashReportSection;
-import net.minecraft.util.profiler.Profiler;
+import net.minecraft.CrashReport;
+import net.minecraft.CrashReportCategory;
+import net.minecraft.ReportedException;
+import net.minecraft.client.Minecraft;
+import net.minecraft.core.Holder;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.FlyingMob;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.animal.WaterAnimal;
+import net.minecraft.world.entity.decoration.ArmorStand;
+import net.minecraft.world.entity.monster.Shulker;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.vehicle.AbstractMinecart;
+import net.minecraft.world.entity.vehicle.Boat;
 
 public class SoundEngine implements IdentifiableResourceReloadListener {
-    private static final Identifier BLOCK_MAP = new Identifier("presencefootsteps", "config/blockmap.json");
-    private static final Identifier GOLEM_MAP = new Identifier("presencefootsteps", "config/golemmap.json");
-    private static final Identifier LOCOMOTION_MAP = new Identifier("presencefootsteps", "config/locomotionmap.json");
-    private static final Identifier PRIMITIVE_MAP = new Identifier("presencefootsteps", "config/primitivemap.json");
-    private static final Identifier ACOUSTICS = new Identifier("presencefootsteps", "config/acoustics.json");
-    private static final Identifier VARIATOR = new Identifier("presencefootsteps", "config/variator.json");
+    private static final ResourceLocation BLOCK_MAP = new ResourceLocation("presencefootsteps", "config/blockmap.json");
+    private static final ResourceLocation GOLEM_MAP = new ResourceLocation("presencefootsteps", "config/golemmap.json");
+    private static final ResourceLocation LOCOMOTION_MAP = new ResourceLocation("presencefootsteps", "config/locomotionmap.json");
+    private static final ResourceLocation PRIMITIVE_MAP = new ResourceLocation("presencefootsteps", "config/primitivemap.json");
+    private static final ResourceLocation ACOUSTICS = new ResourceLocation("presencefootsteps", "config/acoustics.json");
+    private static final ResourceLocation VARIATOR = new ResourceLocation("presencefootsteps", "config/variator.json");
 
-    private static final Identifier ID = new Identifier("presencefootsteps", "sounds");
+    private static final ResourceLocation ID = new ResourceLocation("presencefootsteps", "sounds");
 
     private PFIsolator isolator = new PFIsolator(this);
 
@@ -62,7 +62,7 @@ public class SoundEngine implements IdentifiableResourceReloadListener {
     public float getVolumeForSource(LivingEntity source) {
         float volume = config.getGlobalVolume() / 100F;
 
-        if (source instanceof PlayerEntity) {
+        if (source instanceof Player) {
             if (PlayerUtil.isClientPlayer(source)) {
                 volume *= config.getClientPlayerVolume() / 100F;
             } else {
@@ -83,34 +83,34 @@ public class SoundEngine implements IdentifiableResourceReloadListener {
 
     public void reload() {
         if (config.getEnabled()) {
-            reloadEverything(MinecraftClient.getInstance().getResourceManager());
+            reloadEverything(Minecraft.getInstance().getResourceManager());
         } else {
             shutdown();
         }
     }
 
-    public boolean isRunning(MinecraftClient client) {
-        return hasConfigurations && config.getEnabled() && (client.isInSingleplayer() || config.getEnabledMP());
+    public boolean isRunning(Minecraft client) {
+        return hasConfigurations && config.getEnabled() && (client.isLocalServer() || config.getEnabledMP());
     }
 
     private Stream<? extends Entity> getTargets(final Entity cameraEntity) {
-        final List<? extends Entity> entities = cameraEntity.getWorld().getOtherEntities(null, cameraEntity.getBoundingBox().expand(16), e -> {
+        final List<? extends Entity> entities = cameraEntity.level().getEntities(null, cameraEntity.getBoundingBox().inflate(16), e -> {
             return e instanceof LivingEntity
-                    && !(e instanceof WaterCreatureEntity)
-                    && !(e instanceof FlyingEntity)
-                    && !(e instanceof ShulkerEntity
-                            || e instanceof ArmorStandEntity
-                            || e instanceof BoatEntity
-                            || e instanceof AbstractMinecartEntity)
+                    && !(e instanceof WaterAnimal)
+                    && !(e instanceof FlyingMob)
+                    && !(e instanceof Shulker
+                            || e instanceof ArmorStand
+                            || e instanceof Boat
+                            || e instanceof AbstractMinecart)
                         && !isolator.getGolemMap().contains(e.getType())
-                        && !e.hasVehicle()
+                        && !e.isPassenger()
                         && !((LivingEntity)e).isSleeping()
-                        && (!(e instanceof PlayerEntity) || !e.isSpectator())
-                        && e.squaredDistanceTo(cameraEntity) <= 256
+                        && (!(e instanceof Player) || !e.isSpectator())
+                        && e.distanceToSqr(cameraEntity) <= 256
                         && config.getEntitySelector().test(e);
         });
 
-        final Comparator<Entity> nearest = Comparator.comparingDouble(e -> e.squaredDistanceTo(cameraEntity));
+        final Comparator<Entity> nearest = Comparator.comparingDouble(e -> e.distanceToSqr(cameraEntity));
 
         if (entities.size() < config.getMaxSteppingEntities()) {
             return entities.stream();
@@ -120,10 +120,10 @@ public class SoundEngine implements IdentifiableResourceReloadListener {
             .sorted(nearest)
                     // Always play sounds for players and the entities closest to the camera
                         // If multiple entities share the same block, only play sounds for one of each distinct type
-            .filter(e -> e == cameraEntity || e instanceof PlayerEntity || (alreadyVisited.size() < config.getMaxSteppingEntities() && alreadyVisited.add(Objects.hash(e.getType(), e.getBlockPos()))));
+            .filter(e -> e == cameraEntity || e instanceof Player || (alreadyVisited.size() < config.getMaxSteppingEntities() && alreadyVisited.add(Objects.hash(e.getType(), e.blockPosition()))));
     }
 
-    public void onFrame(MinecraftClient client, Entity cameraEntity) {
+    public void onFrame(Minecraft client, Entity cameraEntity) {
         if (!client.isPaused() && isRunning(client)) {
             getTargets(cameraEntity).forEach(e -> {
                 try {
@@ -132,21 +132,21 @@ public class SoundEngine implements IdentifiableResourceReloadListener {
                         if (generator.generateFootsteps((LivingEntity)e)) {
                             ((IEntity) e).setNextStepDistance(Integer.MAX_VALUE);
                         } else if (((IEntity) e).getNextStepDistance() == Integer.MAX_VALUE) {
-                            ((IEntity) e).setNextStepDistance(e.distanceTraveled + 1);
+                            ((IEntity) e).setNextStepDistance(e.moveDist + 1);
                         }
                     });
                 } catch (Throwable t) {
-                    CrashReport report = CrashReport.create(t, "Generating PF sounds for entity");
-                    CrashReportSection section = report.addElement("Entity being ticked");
+                    CrashReport report = CrashReport.forThrowable(t, "Generating PF sounds for entity");
+                    CrashReportCategory section = report.addCategory("Entity being ticked");
                     if (e == null) {
-                        section.add("Entity Type", "null");
+                        section.setDetail("Entity Type", "null");
                     } else {
-                        e.populateCrashReport(section);
-                        section.add("Entity's Locomotion Type", isolator.getLocomotionMap().lookup(e));
-                        section.add("Entity is Golem", isolator.getGolemMap().contains(e.getType()));
+                        e.fillCrashReportCategory(section);
+                        section.setDetail("Entity's Locomotion Type", isolator.getLocomotionMap().lookup(e));
+                        section.setDetail("Entity is Golem", isolator.getGolemMap().contains(e.getType()));
                     }
-                    config.populateCrashReport(report.addElement("PF Configuration"));
-                    throw new CrashException(report);
+                    config.populateCrashReport(report.addCategory("PF Configuration"));
+                    throw new ReportedException(report);
                 }
             });
 
@@ -154,16 +154,16 @@ public class SoundEngine implements IdentifiableResourceReloadListener {
         }
     }
 
-    public boolean onSoundRecieved(@Nullable RegistryEntry<SoundEvent> event, SoundCategory category) {
-        if (event == null || category != SoundCategory.PLAYERS || !isRunning(MinecraftClient.getInstance())) {
+    public boolean onSoundRecieved(@Nullable Holder<SoundEvent> event, SoundSource category) {
+        if (event == null || category != SoundSource.PLAYERS || !isRunning(Minecraft.getInstance())) {
             return false;
         }
 
-        return event.getKeyOrValue().right().filter(sound -> {
-            if (event == SoundEvents.ENTITY_PLAYER_SWIM
-                    || event == SoundEvents.ENTITY_PLAYER_SPLASH
-                    || event == SoundEvents.ENTITY_PLAYER_BIG_FALL
-                    || event == SoundEvents.ENTITY_PLAYER_SMALL_FALL) {
+        return event.unwrap().right().filter(sound -> {
+            if (event == SoundEvents.PLAYER_SWIM
+                    || event == SoundEvents.PLAYER_SPLASH
+                    || event == SoundEvents.PLAYER_BIG_FALL
+                    || event == SoundEvents.PLAYER_SMALL_FALL) {
                        return true;
                    }
 
@@ -175,22 +175,22 @@ public class SoundEngine implements IdentifiableResourceReloadListener {
     }
 
     public Locomotion getLocomotion(LivingEntity entity) {
-        if (entity instanceof PlayerEntity) {
-            return Locomotion.forPlayer((PlayerEntity)entity, config.getLocomotion());
+        if (entity instanceof Player) {
+            return Locomotion.forPlayer((Player)entity, config.getLocomotion());
         }
         return isolator.getLocomotionMap().lookup(entity);
     }
 
     @Override
-    public Identifier getFabricId() {
+    public ResourceLocation getFabricId() {
         return ID;
     }
 
     @Override
-    public CompletableFuture<Void> reload(Synchronizer sync, ResourceManager sender,
-                                          Profiler serverProfiler, Profiler clientProfiler,
+    public CompletableFuture<Void> reload(PreparationBarrier sync, ResourceManager sender,
+                                          ProfilerFiller serverProfiler, ProfilerFiller clientProfiler,
                                           Executor serverExecutor, Executor clientExecutor) {
-        return sync.whenPrepared(null).thenRunAsync(() -> {
+        return sync.wait(null).thenRunAsync(() -> {
             clientProfiler.startTick();
             clientProfiler.push("Reloading PF Sounds");
             reloadEverything(sender);
@@ -215,7 +215,7 @@ public class SoundEngine implements IdentifiableResourceReloadListener {
         isolator = new PFIsolator(this);
         hasConfigurations = false;
 
-        PlayerEntity player = MinecraftClient.getInstance().player;
+        Player player = Minecraft.getInstance().player;
 
         if (player != null) {
             ((IEntity) player).setNextStepDistance(0);

@@ -1,14 +1,13 @@
 package eu.ha3.presencefootsteps;
 
 import java.util.*;
-
+import net.minecraft.client.Minecraft;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import eu.ha3.presencefootsteps.sound.SoundEngine;
 import eu.ha3.presencefootsteps.world.Emitter;
-import net.minecraft.block.BlockState;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.sound.BlockSoundGroup;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.hit.HitResult;
 
 public class PFDebugHud {
 
@@ -19,31 +18,31 @@ public class PFDebugHud {
     }
 
     public void render(HitResult blockHit, HitResult fluidHit, List<String> list) {
-        MinecraftClient client = MinecraftClient.getInstance();
+        Minecraft client = Minecraft.getInstance();
 
         if (blockHit.getType() == HitResult.Type.BLOCK) {
-            BlockState state = client.world.getBlockState(((BlockHitResult)blockHit).getBlockPos());
+            BlockState state = client.level.getBlockState(((BlockHitResult)blockHit).getBlockPos());
 
-            renderSoundList("Primitive: " + state.getSoundGroup().getStepSound().getId()
-                    + "@" + String.format(Locale.ENGLISH, "%.2f_%.2f", state.getSoundGroup().volume, state.getSoundGroup().pitch),
-                    engine.getIsolator().getPrimitiveMap().getAssociations(state.getSoundGroup()),
+            renderSoundList("Primitive: " + state.getSoundType().getStepSound().getLocation()
+                    + "@" + String.format(Locale.ENGLISH, "%.2f_%.2f", state.getSoundType().volume, state.getSoundType().pitch),
+                    engine.getIsolator().getPrimitiveMap().getAssociations(state.getSoundType()),
                     list);
 
             renderSoundList("PF Sounds",
                     engine.getIsolator().getBlockMap().getAssociations(state),
                     list);
 
-            BlockSoundGroup sound = state.getSoundGroup();
+            SoundType sound = state.getSoundType();
             renderSoundList("PF Prims",
                     engine.getIsolator().getPrimitiveMap().getAssociations(sound),
                     list);
         }
 
-        if (client.targetedEntity != null) {
+        if (client.crosshairPickEntity != null) {
             renderSoundList("PF Golem Sounds",
-                    engine.getIsolator().getGolemMap().getAssociations(client.targetedEntity.getType()),
+                    engine.getIsolator().getGolemMap().getAssociations(client.crosshairPickEntity.getType()),
                     list);
-            list.add(engine.getIsolator().getLocomotionMap().lookup(client.targetedEntity).getDisplayName());
+            list.add(engine.getIsolator().getLocomotionMap().lookup(client.crosshairPickEntity).getDisplayName());
         }
     }
 

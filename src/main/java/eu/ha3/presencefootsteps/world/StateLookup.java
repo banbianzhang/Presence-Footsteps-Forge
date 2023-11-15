@@ -2,17 +2,16 @@ package eu.ha3.presencefootsteps.world;
 
 import eu.ha3.presencefootsteps.PresenceFootsteps;
 import it.unimi.dsi.fastutil.objects.*;
-import net.minecraft.block.BlockState;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.tag.TagKey;
-import net.minecraft.state.property.Property;
-import net.minecraft.util.Identifier;
-
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.Property;
 
 /**
  * A state lookup that finds an association for a given block state within a specific substrate (or no substrate).
@@ -72,8 +71,8 @@ public record StateLookup(Map<String, Bucket> substrates) implements Lookup<Bloc
 
         record Substrate(
                 KeyList wildcards,
-                Map<Identifier, Bucket> blocks,
-                Map<Identifier, Bucket> tags) implements Bucket {
+                Map<ResourceLocation, Bucket> blocks,
+                Map<ResourceLocation, Bucket> tags) implements Bucket {
 
             Substrate(String substrate) {
                 this(new KeyList(), new Object2ObjectLinkedOpenHashMap<>(), new Object2ObjectLinkedOpenHashMap<>());
@@ -103,9 +102,9 @@ public record StateLookup(Map<String, Bucket> substrates) implements Lookup<Bloc
             }
 
             private Bucket getTile(BlockState state) {
-                return blocks.computeIfAbsent(Registries.BLOCK.getId(state.getBlock()), id -> {
-                    for (Identifier tag : tags.keySet()) {
-                        if (state.isIn(TagKey.of(RegistryKeys.BLOCK, tag))) {
+                return blocks.computeIfAbsent(BuiltInRegistries.BLOCK.getKey(state.getBlock()), id -> {
+                    for (ResourceLocation tag : tags.keySet()) {
+                        if (state.is(TagKey.create(Registries.BLOCK, tag))) {
                             return tags.get(tag);
                         }
                     }
@@ -116,7 +115,7 @@ public record StateLookup(Map<String, Bucket> substrates) implements Lookup<Bloc
         }
 
         record Tile(Map<BlockState, Key> cache, KeyList keys) implements Bucket {
-            Tile(Identifier id) {
+            Tile(ResourceLocation id) {
                 this(new Object2ObjectLinkedOpenHashMap<>(), new KeyList());
             }
 
@@ -169,7 +168,7 @@ public record StateLookup(Map<String, Bucket> substrates) implements Lookup<Bloc
     }
 
     private record Key(
-            Identifier identifier,
+            ResourceLocation identifier,
             String substrate,
             Set<Attribute> properties,
             String value,
@@ -177,7 +176,7 @@ public record StateLookup(Map<String, Bucket> substrates) implements Lookup<Bloc
             boolean isTag,
             boolean isWildcard
     ) {
-        public static final Key NULL = new Key(new Identifier("air"), "", ObjectSets.emptySet(), Emitter.UNASSIGNED, true, false, false);
+        public static final Key NULL = new Key(new ResourceLocation("air"), "", ObjectSets.emptySet(), Emitter.UNASSIGNED, true, false, false);
 
         public static Key of(String key, String value) {
             final boolean isTag = key.indexOf('#') == 0;
@@ -188,17 +187,17 @@ public record StateLookup(Map<String, Bucket> substrates) implements Lookup<Bloc
 
             final String id = key.split("[\\.\\[]")[0];
             final boolean isWildcard = id.indexOf('*') == 0;
-            Identifier identifier = new Identifier("air");
+            ResourceLocation identifier = new ResourceLocation("air");
 
             if (!isWildcard) {
                 if (id.indexOf('^') > -1) {
-                    identifier = new Identifier(id.split("\\^")[0]);
+                    identifier = new ResourceLocation(id.split("\\^")[0]);
                     PresenceFootsteps.logger.warn("Metadata entry for " + key + "=" + value + " was ignored");
                 } else {
-                    identifier = new Identifier(id);
+                    identifier = new ResourceLocation(id);
                 }
 
-                if (!isTag && !Registries.BLOCK.containsId(identifier)) {
+                if (!isTag && !BuiltInRegistries.BLOCK.containsKey(identifier)) {
                     PresenceFootsteps.logger.warn("Sound registered for unknown block id " + identifier);
                 }
             }
@@ -231,7 +230,7 @@ public record StateLookup(Map<String, Bucket> substrates) implements Lookup<Bloc
                 return true;
             }
 
-            Map<Property<?>, Comparable<?>> entries = state.getEntries();
+            Map<Property<?>, Comparable<?>> entries = state.getValues();
             Set<Property<?>> keys = entries.keySet();
 
             for (Attribute property : properties) {

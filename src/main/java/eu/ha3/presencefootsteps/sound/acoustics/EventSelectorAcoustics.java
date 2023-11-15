@@ -5,9 +5,8 @@ import eu.ha3.presencefootsteps.sound.Options;
 import eu.ha3.presencefootsteps.sound.State;
 import eu.ha3.presencefootsteps.sound.player.SoundPlayer;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import net.minecraft.entity.LivingEntity;
-
 import java.util.Map;
+import net.minecraft.world.entity.LivingEntity;
 
 /**
  * An acoustic that can play different acoustics depending on a specific event type.

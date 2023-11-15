@@ -1,18 +1,17 @@
 package eu.ha3.presencefootsteps.world;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
-import net.minecraft.entity.EntityType;
-import net.minecraft.util.Identifier;
-
 import java.util.Map;
 import java.util.Set;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.EntityType;
 
 public class GolemLookup implements Lookup<EntityType<?>> {
-    private final Map<String, Map<Identifier, String>> substrates = new Object2ObjectLinkedOpenHashMap<>();
+    private final Map<String, Map<ResourceLocation, String>> substrates = new Object2ObjectLinkedOpenHashMap<>();
 
     @Override
     public String getAssociation(EntityType<?> key, String substrate) {
-        Map<Identifier, String> primitives = substrates.get(substrate);
+        Map<ResourceLocation, String> primitives = substrates.get(substrate);
 
         if (primitives == null) {
             // Check for default
@@ -23,7 +22,7 @@ public class GolemLookup implements Lookup<EntityType<?>> {
             return Emitter.UNASSIGNED;
         }
 
-        return primitives.getOrDefault(EntityType.getId(key), Emitter.UNASSIGNED);
+        return primitives.getOrDefault(EntityType.getKey(key), Emitter.UNASSIGNED);
     }
 
     @Override
@@ -39,14 +38,14 @@ public class GolemLookup implements Lookup<EntityType<?>> {
 
         substrates
             .computeIfAbsent(substrate, s -> new Object2ObjectLinkedOpenHashMap<>())
-            .put(new Identifier(primitive), value);
+            .put(new ResourceLocation(primitive), value);
     }
 
     @Override
     public boolean contains(EntityType<?> key) {
-        final Identifier primitive = EntityType.getId(key);
+        final ResourceLocation primitive = EntityType.getKey(key);
 
-        for (Map<Identifier, String> primitives : substrates.values()) {
+        for (Map<ResourceLocation, String> primitives : substrates.values()) {
             if (primitives.containsKey(primitive)) {
                 return true;
             }

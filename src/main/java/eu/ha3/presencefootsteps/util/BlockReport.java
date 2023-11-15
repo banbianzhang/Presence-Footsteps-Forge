@@ -18,16 +18,16 @@ import com.minelittlepony.common.util.GamePaths;
 import eu.ha3.presencefootsteps.PresenceFootsteps;
 import eu.ha3.presencefootsteps.world.Lookup;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.block.BlockState;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.tag.TagKey;
-import net.minecraft.sound.BlockSoundGroup;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class BlockReport {
     private final Path loc;
@@ -42,7 +42,7 @@ public class BlockReport {
                 writeReport(filter);
                 printResults();
             } catch (Exception e) {
-                addMessage(Text.translatable("pf.report.error", e.getMessage()).styled(s -> s.withColor(Formatting.RED)));
+                addMessage(Component.translatable("pf.report.error", e.getMessage()).withStyle(s -> s.withColor(ChatFormatting.RED)));
             }
         });
     }
@@ -52,19 +52,19 @@ public class BlockReport {
 
         try (var writer = JsonObjectWriter.of(new JsonWriter(Files.newBufferedWriter(loc)))) {
             writer.object(() -> {
-                final Map<String, BlockSoundGroup> groups = new Object2ObjectOpenHashMap<>();
+                final Map<String, SoundType> groups = new Object2ObjectOpenHashMap<>();
                 writer.object("blocks", () -> {
-                    writer.each(Registries.BLOCK, block -> {
-                        BlockState state = block.getDefaultState();
+                    writer.each(BuiltInRegistries.BLOCK, block -> {
+                        BlockState state = block.defaultBlockState();
 
-                        var group = block.getDefaultState().getSoundGroup();
+                        var group = block.defaultBlockState().getSoundType();
                         if (group != null && group.getStepSound() != null) {
                             String substrate = String.format(Locale.ENGLISH, "%.2f_%.2f", group.volume, group.pitch);
-                            groups.put(group.getStepSound().getId().toString() + "@" + substrate, group);
+                            groups.put(group.getStepSound().getLocation().toString() + "@" + substrate, group);
                         }
 
                         if (filter == null || filter.test(state)) {
-                            writer.object(Registries.BLOCK.getId(block).toString(), () -> {
+                            writer.object(BuiltInRegistries.BLOCK.getKey(block).toString(), () -> {
                                 writer.field("class", getClassData(state));
                                 writer.field("tags", getTagData(state));
                                 writer.field("sound", getSoundData(group));
@@ -74,10 +74,10 @@ public class BlockReport {
                     });
                 });
                 writer.array("unmapped_entities", () -> {
-                    writer.each(Registries.ENTITY_TYPE, type -> {
-                        Identifier id = Registries.ENTITY_TYPE.getId(type);
+                    writer.each(BuiltInRegistries.ENTITY_TYPE, type -> {
+                        ResourceLocation id = BuiltInRegistries.ENTITY_TYPE.getKey(type);
                         if (!PresenceFootsteps.getInstance().getEngine().getIsolator().getLocomotionMap().contains(id)) {
-                            if (type.create(MinecraftClient.getInstance().world) instanceof LivingEntity) {
+                            if (type.create(Minecraft.getInstance().level) instanceof LivingEntity) {
                                 writer.writer().value(id.toString());
                             }
                         }
@@ -86,21 +86,21 @@ public class BlockReport {
                 writer.object("primitives", () -> {
                     writer.each(groups.values(), group -> {
                         String substrate = String.format(Locale.ENGLISH, "%.2f_%.2f", group.volume, group.pitch);
-                        writer.field(group.getStepSound().getId().toString() + "@" + substrate, PresenceFootsteps.getInstance().getEngine().getIsolator().getPrimitiveMap().getAssociation(group, substrate));
+                        writer.field(group.getStepSound().getLocation().toString() + "@" + substrate, PresenceFootsteps.getInstance().getEngine().getIsolator().getPrimitiveMap().getAssociation(group, substrate));
                     });
                 });
             });
         }
     }
 
-    private String getSoundData(@Nullable BlockSoundGroup group) {
+    private String getSoundData(@Nullable SoundType group) {
         if (group == null) {
             return "NULL";
         }
         if (group.getStepSound() == null) {
             return "NO_SOUND";
         }
-        return group.getStepSound().getId().getPath();
+        return group.getStepSound().getLocation().getPath();
     }
 
     private String getClassData(BlockState state) {
@@ -113,19 +113,19 @@ public class BlockReport {
     }
 
     private String getTagData(BlockState state) {
-        return Registries.BLOCK.streamTags().filter(state::isIn).map(TagKey::id).map(Identifier::toString).collect(Collectors.joining(","));
+        return BuiltInRegistries.BLOCK.getTagNames().filter(state::is).map(TagKey::location).map(ResourceLocation::toString).collect(Collectors.joining(","));
     }
 
     private void printResults() {
-        addMessage(Text.translatable("pf.report.save", Text.literal(loc.getFileName().toString()).styled(s -> s
+        addMessage(Component.translatable("pf.report.save", Component.literal(loc.getFileName().toString()).withStyle(s -> s
                 .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, loc.toString()))
-                .withFormatting(Formatting.UNDERLINE)))
-            .styled(s -> s
-                .withColor(Formatting.GREEN)));
+                .applyFormat(ChatFormatting.UNDERLINE)))
+            .withStyle(s -> s
+                .withColor(ChatFormatting.GREEN)));
     }
 
-    public static void addMessage(Text text) {
-        MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(text);
+    public static void addMessage(Component text) {
+        Minecraft.getInstance().gui.getChat().addMessage(text);
     }
 
     static Path getUniqueFileName(Path directory, String baseName, String ext) {

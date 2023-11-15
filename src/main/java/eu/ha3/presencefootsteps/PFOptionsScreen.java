@@ -1,8 +1,9 @@
 package eu.ha3.presencefootsteps;
 
-import java.util.Optional;
 import java.util.function.Function;
-
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 
 import com.minelittlepony.common.client.gui.GameGui;
@@ -14,16 +15,11 @@ import com.minelittlepony.common.client.gui.element.EnumSlider;
 import com.minelittlepony.common.client.gui.element.Label;
 import com.minelittlepony.common.client.gui.element.Slider;
 
-import eu.ha3.mc.quick.update.Versions;
 import eu.ha3.presencefootsteps.util.BlockReport;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.text.Text;
 
 class PFOptionsScreen extends GameGui {
-    public static final Text TITLE = Text.translatable("menu.pf.title");
-    public static final Text UP_TO_DATE = Text.translatable("pf.update.up_to_date");
-    public static final Text VOLUME_MIN = Text.translatable("menu.pf.volume.min");
+    public static final Component TITLE = Component.translatable("menu.pf.title");
+    public static final Component VOLUME_MIN = Component.translatable("menu.pf.volume.min");
 
     public PFOptionsScreen(@Nullable Screen parent) {
         super(TITLE, parent);
@@ -42,14 +38,6 @@ class PFOptionsScreen extends GameGui {
 
         addButton(new Label(width / 2, 30)).setCentered().getStyle()
                 .setText(getTitle());
-
-        redrawUpdateButton(addButton(new Button(width - 45, 20, 25, 20)).onClick(sender -> {
-            sender.setEnabled(false);
-            sender.getStyle().setTooltip("pf.update.checking");
-            PresenceFootsteps.getInstance().getUpdateChecker().checkNow().thenAccept(newVersions -> {
-                redrawUpdateButton(sender);
-            });
-        }));
 
         var slider = addButton(new Slider(wideLeft, row, 0, 100, config.getGlobalVolume()))
             .onChange(config::setGlobalVolume)
@@ -102,7 +90,7 @@ class PFOptionsScreen extends GameGui {
             new BlockReport("report_concise")
                 .execute(state -> !PresenceFootsteps.getInstance().getEngine().getIsolator().getBlockMap().contains(state))
                 .thenRun(() -> sender.setEnabled(true));
-        })).setEnabled(client.world != null)
+        })).setEnabled(minecraft.level != null)
             .getStyle()
             .setText("menu.pf.report.concise");
 
@@ -113,7 +101,7 @@ class PFOptionsScreen extends GameGui {
                     .execute(null)
                     .thenRun(() -> sender.setEnabled(true));
             }))
-            .setEnabled(client.world != null)
+            .setEnabled(minecraft.level != null)
             .getStyle()
                 .setText("menu.pf.report.full");
 
@@ -123,35 +111,20 @@ class PFOptionsScreen extends GameGui {
     }
 
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float partialTicks) {
+    public void render(GuiGraphics context, int mouseX, int mouseY, float partialTicks) {
         renderBackground(context);
         super.render(context, mouseX, mouseY, partialTicks);
     }
 
-    private void redrawUpdateButton(Button button) {
-        Optional<Versions> versions = PresenceFootsteps.getInstance().getUpdateChecker().getNewer();
-        boolean hasUpdate = versions.isPresent();
-        button.setEnabled(true);
-        button.getStyle()
-           .setText(hasUpdate ? "!" : ":)")
-           .setColor(hasUpdate ? 0xAAFF00 : 0xFFFFFF)
-           .setTooltip(versions
-                   .map(Versions::latest)
-                   .map(latest -> (Text)Text.translatable("pf.update.updates_available",
-                           latest.version().getFriendlyString(),
-                           latest.minecraft().getFriendlyString()))
-                   .orElse(UP_TO_DATE));
-    }
-
-    private Text formatVolume(AbstractSlider<Float> slider) {
+    private Component formatVolume(AbstractSlider<Float> slider) {
         if (slider.getValue() <= 0) {
             return VOLUME_MIN;
         }
 
-        return Text.translatable("menu.pf.volume", (int)Math.floor(slider.getValue()));
+        return Component.translatable("menu.pf.volume", (int)Math.floor(slider.getValue()));
     }
 
-    static Function<AbstractSlider<Float>, Text> formatVolume(String key) {
-        return slider -> Text.translatable(key, (int)Math.floor(slider.getValue()));
+    static Function<AbstractSlider<Float>, Component> formatVolume(String key) {
+        return slider -> Component.translatable(key, (int)Math.floor(slider.getValue()));
     }
 }
