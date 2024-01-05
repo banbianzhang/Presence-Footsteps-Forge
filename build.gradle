@@ -13,7 +13,7 @@ java {
 
 group = project.group
 description = project.displayname
-archivesBaseName = project.name
+base.archivesName = project.name
 
 loom {
     mixin.defaultRefmapName = 'presencefootsteps.mixin.refmap.json'
@@ -44,10 +44,6 @@ dependencies {
 
 tasks.named('processResources', ProcessResources) {
     inputs.property "version", project.version.toString()
-
-    filesMatching("fabric.mod.json") {
-        expand "version": project.version.toString()
-    }
 
     from 'LICENSE'
 }
