@@ -9,6 +9,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.stream.Stream;
 
+import net.minecraft.server.packs.resources.PreparableReloadListener;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import eu.ha3.presencefootsteps.PFConfig;
@@ -17,7 +19,6 @@ import eu.ha3.presencefootsteps.sound.acoustics.AcousticsJsonParser;
 import eu.ha3.presencefootsteps.sound.generator.Locomotion;
 import eu.ha3.presencefootsteps.util.PlayerUtil;
 import eu.ha3.presencefootsteps.util.ResourceUtils;
-import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
@@ -39,7 +40,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.entity.vehicle.Boat;
 
-public class SoundEngine implements IdentifiableResourceReloadListener {
+public class SoundEngine implements PreparableReloadListener {
     private static final ResourceLocation BLOCK_MAP = new ResourceLocation("presencefootsteps", "config/blockmap.json");
     private static final ResourceLocation GOLEM_MAP = new ResourceLocation("presencefootsteps", "config/golemmap.json");
     private static final ResourceLocation LOCOMOTION_MAP = new ResourceLocation("presencefootsteps", "config/locomotionmap.json");
@@ -47,7 +48,7 @@ public class SoundEngine implements IdentifiableResourceReloadListener {
     private static final ResourceLocation ACOUSTICS = new ResourceLocation("presencefootsteps", "config/acoustics.json");
     private static final ResourceLocation VARIATOR = new ResourceLocation("presencefootsteps", "config/variator.json");
 
-    private static final ResourceLocation ID = new ResourceLocation("presencefootsteps", "sounds");
+    //private static final ResourceLocation ID = new ResourceLocation("presencefootsteps", "sounds");
 
     private PFIsolator isolator = new PFIsolator(this);
 
@@ -94,7 +95,7 @@ public class SoundEngine implements IdentifiableResourceReloadListener {
     }
 
     private Stream<? extends Entity> getTargets(final Entity cameraEntity) {
-        final List<? extends Entity> entities = cameraEntity.level().getEntities(null, cameraEntity.getBoundingBox().inflate(16), e -> {
+        final List<? extends Entity> entities = cameraEntity.level().getEntities((Entity) null, cameraEntity.getBoundingBox().inflate(16), e -> {
             return e instanceof LivingEntity
                     && !(e instanceof WaterAnimal)
                     && !(e instanceof FlyingMob)
@@ -182,14 +183,9 @@ public class SoundEngine implements IdentifiableResourceReloadListener {
     }
 
     @Override
-    public ResourceLocation getFabricId() {
-        return ID;
-    }
-
-    @Override
-    public CompletableFuture<Void> reload(PreparationBarrier sync, ResourceManager sender,
-                                          ProfilerFiller serverProfiler, ProfilerFiller clientProfiler,
-                                          Executor serverExecutor, Executor clientExecutor) {
+    public @NotNull CompletableFuture<Void> reload(PreparationBarrier sync, ResourceManager sender,
+                                                   ProfilerFiller serverProfiler, ProfilerFiller clientProfiler,
+                                                   Executor serverExecutor, Executor clientExecutor) {
         return sync.wait(null).thenRunAsync(() -> {
             clientProfiler.startTick();
             clientProfiler.push("Reloading PF Sounds");
@@ -203,7 +199,7 @@ public class SoundEngine implements IdentifiableResourceReloadListener {
         isolator = new PFIsolator(this);
         hasConfigurations = false;
 
-        hasConfigurations |= ResourceUtils.forEachReverse(BLOCK_MAP, manager, isolator.getBlockMap()::load);
+        hasConfigurations = ResourceUtils.forEachReverse(BLOCK_MAP, manager, isolator.getBlockMap()::load);
         hasConfigurations |= ResourceUtils.forEach(GOLEM_MAP, manager, isolator.getGolemMap()::load);
         hasConfigurations |= ResourceUtils.forEach(PRIMITIVE_MAP, manager, isolator.getPrimitiveMap()::load);
         hasConfigurations |= ResourceUtils.forEach(LOCOMOTION_MAP, manager, isolator.getLocomotionMap()::load);

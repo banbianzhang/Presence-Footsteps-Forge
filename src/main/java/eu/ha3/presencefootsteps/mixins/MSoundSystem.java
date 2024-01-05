@@ -15,12 +15,12 @@ import net.minecraft.util.Mth;
 @Mixin(SoundEngine.class)
 abstract class MSoundSystem {
     @Shadow
-    abstract float getSoundVolume(@Nullable SoundSource category);
+    protected abstract float getVolume(@Nullable SoundSource category);
 
-    @Inject(method = "getAdjustedVolume(Lnet/minecraft/client/sound/SoundInstance;)F", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "calculateVolume(Lnet/minecraft/client/resources/sounds/SoundInstance;)F", at = @At("HEAD"), cancellable = true)
     private void onGetAdjustedVolume(SoundInstance sound, CallbackInfoReturnable<Float> info) {
         if (sound instanceof ImmediateSoundPlayer.UncappedSoundInstance t) {
-            info.setReturnValue(Mth.clamp(t.getVolume() * getSoundVolume(t.getSource()), 0, t.getMaxVolume()));
+            info.setReturnValue(Mth.clamp(t.getVolume() * getVolume(t.getSource()), 0, t.getMaxVolume()));
         }
     }
 }

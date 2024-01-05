@@ -15,7 +15,7 @@ public interface Options {
         }
     };
     Options WET_VOLUME_OPTIONS = ofGetter("volume_percentage", () -> {
-        return PresenceFootsteps.getInstance().getConfig().getWetSoundsVolume() / 100F;
+        return PresenceFootsteps.getInstance().config.getWetSoundsVolume() / 100F;
     });
 
     static Options singular(String key, float value) {

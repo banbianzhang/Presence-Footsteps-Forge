@@ -17,7 +17,7 @@ import com.minelittlepony.common.client.gui.element.Slider;
 
 import eu.ha3.presencefootsteps.util.BlockReport;
 
-class PFOptionsScreen extends GameGui {
+public class PFOptionsScreen extends GameGui {
     public static final Component TITLE = Component.translatable("menu.pf.title");
     public static final Component VOLUME_MIN = Component.translatable("menu.pf.volume.min");
 
@@ -34,7 +34,7 @@ class PFOptionsScreen extends GameGui {
 
         int row = height / 4;
 
-        PFConfig config = PresenceFootsteps.getInstance().getConfig();
+        PFConfig config = PresenceFootsteps.getInstance()..config;
 
         addButton(new Label(width / 2, 30)).setCentered().getStyle()
                 .setText(getTitle());
@@ -88,7 +88,7 @@ class PFOptionsScreen extends GameGui {
         addButton(new Button(wideLeft, row += 24, 150, 20).onClick(sender -> {
             sender.setEnabled(false);
             new BlockReport("report_concise")
-                .execute(state -> !PresenceFootsteps.getInstance().getEngine().getIsolator().getBlockMap().contains(state))
+                .execute(state -> !PresenceFootsteps.getInstance().engine.getIsolator().getBlockMap().contains(state))
                 .thenRun(() -> sender.setEnabled(true));
         })).setEnabled(minecraft.level != null)
             .getStyle()

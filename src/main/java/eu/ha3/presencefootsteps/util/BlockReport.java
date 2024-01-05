@@ -10,14 +10,13 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import net.minecraftforge.fml.loading.FMLPaths;
 import org.jetbrains.annotations.Nullable;
 
 import com.google.gson.stream.JsonWriter;
-import com.minelittlepony.common.util.GamePaths;
 
 import eu.ha3.presencefootsteps.PresenceFootsteps;
 import eu.ha3.presencefootsteps.world.Lookup;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -33,7 +32,7 @@ public class BlockReport {
     private final Path loc;
 
     public BlockReport(String baseName) {
-        loc = getUniqueFileName(GamePaths.getGameDirectory().resolve("presencefootsteps"), baseName, ".json");
+        loc = getUniqueFileName(FMLPaths.GAMEDIR.get().resolve("presencefootsteps"), baseName, ".json");
     }
 
     public CompletableFuture<?> execute(@Nullable Predicate<BlockState> filter) {
@@ -68,7 +67,7 @@ public class BlockReport {
                                 writer.field("class", getClassData(state));
                                 writer.field("tags", getTagData(state));
                                 writer.field("sound", getSoundData(group));
-                                writer.field("association", PresenceFootsteps.getInstance().getEngine().getIsolator().getBlockMap().getAssociation(state, Lookup.EMPTY_SUBSTRATE));
+                                writer.field("association", PresenceFootsteps.getInstance().engine.getIsolator().getBlockMap().getAssociation(state, Lookup.EMPTY_SUBSTRATE));
                             });
                         }
                     });
@@ -76,7 +75,7 @@ public class BlockReport {
                 writer.array("unmapped_entities", () -> {
                     writer.each(BuiltInRegistries.ENTITY_TYPE, type -> {
                         ResourceLocation id = BuiltInRegistries.ENTITY_TYPE.getKey(type);
-                        if (!PresenceFootsteps.getInstance().getEngine().getIsolator().getLocomotionMap().contains(id)) {
+                        if (!PresenceFootsteps.getInstance().engine.getIsolator().getLocomotionMap().contains(id)) {
                             if (type.create(Minecraft.getInstance().level) instanceof LivingEntity) {
                                 writer.writer().value(id.toString());
                             }
@@ -86,7 +85,7 @@ public class BlockReport {
                 writer.object("primitives", () -> {
                     writer.each(groups.values(), group -> {
                         String substrate = String.format(Locale.ENGLISH, "%.2f_%.2f", group.volume, group.pitch);
-                        writer.field(group.getStepSound().getLocation().toString() + "@" + substrate, PresenceFootsteps.getInstance().getEngine().getIsolator().getPrimitiveMap().getAssociation(group, substrate));
+                        writer.field(group.getStepSound().getLocation().toString() + "@" + substrate, PresenceFootsteps.getInstance().engine.getIsolator().getPrimitiveMap().getAssociation(group, substrate));
                     });
                 });
             });
@@ -109,7 +108,7 @@ public class BlockReport {
         if (canonicalName == null) {
             return "<anonymous>";
         }
-        return FabricLoader.getInstance().getMappingResolver().unmapClassName("named", canonicalName);
+        return canonicalName;
     }
 
     private String getTagData(BlockState state) {

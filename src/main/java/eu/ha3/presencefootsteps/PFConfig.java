@@ -53,7 +53,7 @@ public class PFConfig extends JsonFile {
             stance = loco.name();
             save();
 
-            pf.getEngine().reload();
+            pf.engine.reload();
         }
 
         return loco;
@@ -113,7 +113,7 @@ public class PFConfig extends JsonFile {
             save();
 
             if (getEnabled() != wasEnabled) {
-                pf.getEngine().reload();
+                pf.engine.reload();
             }
         }
 
