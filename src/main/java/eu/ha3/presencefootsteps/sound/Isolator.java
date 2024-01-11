@@ -2,7 +2,12 @@ package eu.ha3.presencefootsteps.sound;
 
 import java.io.IOException;
 import java.util.Map;
-
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.state.BlockState;
 import eu.ha3.presencefootsteps.config.Variator;
 import eu.ha3.presencefootsteps.sound.acoustics.AcousticLibrary;
 import eu.ha3.presencefootsteps.sound.acoustics.AcousticsFile;
@@ -20,29 +25,23 @@ import eu.ha3.presencefootsteps.world.LocomotionLookup;
 import eu.ha3.presencefootsteps.world.Lookup;
 import eu.ha3.presencefootsteps.world.PrimitiveLookup;
 import eu.ha3.presencefootsteps.world.StateLookup;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.resource.ResourceManager;
-import net.minecraft.sound.BlockSoundGroup;
-import net.minecraft.util.Identifier;
 
 public record Isolator (
         Variator variator,
         Index<Entity, Locomotion> locomotions,
         Lookup<EntityType<?>> golems,
         Lookup<BlockState> blocks,
-        Lookup<BlockSoundGroup> primitives,
+        Lookup<SoundType> primitives,
         SoundPlayer soundPlayer,
         StepSoundPlayer stepPlayer,
         AcousticLibrary acoustics
     ) implements Reportable {
-    private static final Identifier BLOCK_MAP = new Identifier("presencefootsteps", "config/blockmap.json");
-    private static final Identifier GOLEM_MAP = new Identifier("presencefootsteps", "config/golemmap.json");
-    private static final Identifier LOCOMOTION_MAP = new Identifier("presencefootsteps", "config/locomotionmap.json");
-    private static final Identifier PRIMITIVE_MAP = new Identifier("presencefootsteps", "config/primitivemap.json");
-    private static final Identifier ACOUSTICS = new Identifier("presencefootsteps", "config/acoustics.json");
-    private static final Identifier VARIATOR = new Identifier("presencefootsteps", "config/variator.json");
+    private static final ResourceLocation BLOCK_MAP = new ResourceLocation("presencefootsteps", "config/blockmap.json");
+    private static final ResourceLocation GOLEM_MAP = new ResourceLocation("presencefootsteps", "config/golemmap.json");
+    private static final ResourceLocation LOCOMOTION_MAP = new ResourceLocation("presencefootsteps", "config/locomotionmap.json");
+    private static final ResourceLocation PRIMITIVE_MAP = new ResourceLocation("presencefootsteps", "config/primitivemap.json");
+    private static final ResourceLocation ACOUSTICS = new ResourceLocation("presencefootsteps", "config/acoustics.json");
+    private static final ResourceLocation VARIATOR = new ResourceLocation("presencefootsteps", "config/variator.json");
 
     public Isolator(SoundEngine engine) {
         this(engine, new ImmediateSoundPlayer(engine));
@@ -68,7 +67,7 @@ public record Isolator (
     }
 
     @Override
-    public void writeToReport(boolean full, JsonObjectWriter writer, Map<String, BlockSoundGroup> groups) throws IOException {
+    public void writeToReport(boolean full, JsonObjectWriter writer, Map<String, SoundType> groups) throws IOException {
         writer.object(() -> {
             writer.object("blocks", () -> blocks().writeToReport(full, writer, groups));
             writer.object("entities", () -> locomotions().writeToReport(full, writer, groups));

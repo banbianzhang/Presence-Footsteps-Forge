@@ -7,12 +7,12 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import eu.ha3.presencefootsteps.PresenceFootsteps;
-import net.minecraft.client.network.ClientPlayNetworkHandler;
-import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
-import net.minecraft.network.listener.ClientPlayPacketListener;
+import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 
-@Mixin(ClientPlayNetworkHandler.class)
-public abstract class MClientPlayNetworkHandler implements ClientPlayPacketListener {
+@Mixin(ClientPacketListener.class)
+public abstract class MClientPlayNetworkHandler implements ClientGamePacketListener {
 
     @Inject(method = "onPlaySound(Lnet/minecraft/network/packet/s2c/play/PlaySoundS2CPacket;)V",
             at = @At(value = "INVOKE", target = "net/minectaft/client/ClientWorld.playSound("
@@ -26,8 +26,8 @@ public abstract class MClientPlayNetworkHandler implements ClientPlayPacketListe
             ),
             cancellable = true
     )
-    public void onHandleSoundEffect(PlaySoundS2CPacket packet, CallbackInfo info) {
-        if (PresenceFootsteps.getInstance().getEngine().onSoundRecieved(packet.getSound(), packet.getCategory())) {
+    public void onHandleSoundEffect(ClientboundSoundPacket packet, CallbackInfo info) {
+        if (PresenceFootsteps.getInstance().getEngine().onSoundRecieved(packet.getSound(), packet.getSource())) {
             info.cancel();
         }
     }

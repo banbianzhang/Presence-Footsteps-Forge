@@ -4,19 +4,18 @@ import java.io.IOException;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.SoundType;
 import eu.ha3.presencefootsteps.util.JsonObjectWriter;
 import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
-import net.minecraft.sound.BlockSoundGroup;
-import net.minecraft.util.Identifier;
 
-public class PrimitiveLookup implements Lookup<BlockSoundGroup> {
-    private final Map<String, Map<Identifier, String>> substrates = new Object2ObjectLinkedOpenHashMap<>();
+public class PrimitiveLookup implements Lookup<SoundType> {
+    private final Map<String, Map<ResourceLocation, String>> substrates = new Object2ObjectLinkedOpenHashMap<>();
 
     @Override
-    public String getAssociation(BlockSoundGroup sounds, String substrate) {
-        final Identifier id = sounds.getStepSound().getId();
-        Map<Identifier, String> primitives = substrates.get(substrate);
+    public String getAssociation(SoundType sounds, String substrate) {
+        final ResourceLocation id = sounds.getStepSound().getLocation();
+        Map<ResourceLocation, String> primitives = substrates.get(substrate);
 
         if (primitives == null) {
             // Check for break sound
@@ -48,14 +47,14 @@ public class PrimitiveLookup implements Lookup<BlockSoundGroup> {
 
         substrates
             .computeIfAbsent(substrate, s -> new Object2ObjectLinkedOpenHashMap<>())
-            .put(new Identifier(primitive), value);
+            .put(new ResourceLocation(primitive), value);
     }
 
     @Override
-    public boolean contains(BlockSoundGroup sounds) {
-        final Identifier primitive = sounds.getStepSound().getId();
+    public boolean contains(SoundType sounds) {
+        final ResourceLocation primitive = sounds.getStepSound().getLocation();
 
-        for (Map<Identifier, String> primitives : substrates.values()) {
+        for (Map<ResourceLocation, String> primitives : substrates.values()) {
             if (primitives.containsKey(primitive)) {
                 return true;
             }
@@ -64,11 +63,11 @@ public class PrimitiveLookup implements Lookup<BlockSoundGroup> {
     }
 
     @Override
-    public void writeToReport(boolean full, JsonObjectWriter writer, Map<String, BlockSoundGroup> groups) throws IOException {
+    public void writeToReport(boolean full, JsonObjectWriter writer, Map<String, SoundType> groups) throws IOException {
         writer.each(groups.values(), group -> {
             String substrate = String.format(Locale.ENGLISH, "%.2f_%.2f", group.volume, group.pitch);
             if (full || !contains(group)) {
-                writer.field(group.getStepSound().getId().toString() + "@" + substrate, getAssociation(group, substrate));
+                writer.field(group.getStepSound().getLocation().toString() + "@" + substrate, getAssociation(group, substrate));
             }
         });
     }

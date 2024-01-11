@@ -7,10 +7,9 @@ import eu.ha3.presencefootsteps.sound.State;
 import eu.ha3.presencefootsteps.sound.player.SoundPlayer;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import eu.ha3.presencefootsteps.world.Emitter;
-import net.minecraft.entity.LivingEntity;
-
 import java.util.Map;
 import java.util.stream.Stream;
+import net.minecraft.world.entity.LivingEntity;
 
 public class AcousticsPlayer implements AcousticLibrary {
     private final Map<String, Acoustic> acoustics = new Object2ObjectOpenHashMap<>();
