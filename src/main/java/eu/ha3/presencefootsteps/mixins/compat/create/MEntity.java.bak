@@ -11,6 +11,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
+// todo: fix this for support with the Create mod
 @Mixin(value = Entity.class, priority = 9999 /* Run us last */)
 abstract class MEntity implements ContraptionCollidable {
 

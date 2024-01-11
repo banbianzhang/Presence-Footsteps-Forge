@@ -49,7 +49,7 @@ class PFOptionsScreen extends GameGui {
 
         int row = 0;
 
-        PFConfig config = PresenceFootsteps.getInstance().getConfig();
+        PFConfig config = PresenceFootsteps.getInstance().config;
 
         getChildElements().add(content);
 

@@ -13,7 +13,7 @@ public class PFDebugHud {
 
     private final SoundEngine engine;
 
-    PFDebugHud(SoundEngine engine) {
+    public PFDebugHud(SoundEngine engine) {
         this.engine = engine;
     }
 

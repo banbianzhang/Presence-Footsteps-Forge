@@ -13,7 +13,7 @@ java {
 group = project.group
 description = project.displayname
 base.archivesName = project.name
-version = '1.10.1'
+version = '1.20.2-1.10.1-beta.1'
 
 loom {
     mixin.defaultRefmapName = 'presencefootsteps.mixin.refmap.json'
