@@ -113,7 +113,7 @@ public class SoundEngine implements IdentifiableResourceReloadListener {
     }
 
     private Stream<? extends Entity> getTargets(final Entity cameraEntity) {
-        final List<? extends Entity> entities = cameraEntity.level().getEntities(null, cameraEntity.getBoundingBox().inflate(16), e -> {
+        final List<? extends Entity> entities = cameraEntity.level().getEntities((Entity) null, cameraEntity.getBoundingBox().inflate(16), e -> {
             return e instanceof LivingEntity
                     && !(e instanceof WaterAnimal)
                     && !(e instanceof FlyingMob)
