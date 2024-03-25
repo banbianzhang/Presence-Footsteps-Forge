@@ -3,8 +3,6 @@ package eu.ha3.presencefootsteps.world;
 import eu.ha3.presencefootsteps.PresenceFootsteps;
 import eu.ha3.presencefootsteps.util.JsonObjectWriter;
 import it.unimi.dsi.fastutil.objects.*;
-import net.fabricmc.loader.api.FabricLoader;
-import net.fabricmc.loader.api.MappingResolver;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
@@ -12,14 +10,14 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
+import org.jetbrains.annotations.Nullable;
+
 import java.io.IOException;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import org.jetbrains.annotations.Nullable;
 
 /**
  * A state lookup that finds an association for a given block state within a specific substrate (or no substrate).
@@ -112,11 +110,6 @@ public record StateLookup(Map<String, Bucket> substrates) implements Lookup<Bloc
         if (canonicalName == null) {
             return "<anonymous>";
         }
-
-        try {
-            MappingResolver resolver = FabricLoader.getInstance().getMappingResolver();
-            return resolver.unmapClassName(resolver.getNamespaces().contains("named") ? "named" : "intermediary", canonicalName);
-        } catch (Throwable ignore) {}
 
         return canonicalName;
     }

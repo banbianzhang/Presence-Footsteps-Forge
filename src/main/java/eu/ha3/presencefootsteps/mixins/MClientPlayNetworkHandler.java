@@ -29,7 +29,7 @@ public abstract class MClientPlayNetworkHandler implements ClientGamePacketListe
 //    )
     @Inject(method = "handleSoundEvent(Lnet/minecraft/network/protocol/game/ClientboundSoundPacket;)V", at = @At("HEAD"), cancellable = true)
     public void onHandleSoundEffect(ClientboundSoundPacket packet, CallbackInfo info) {
-        if (PresenceFootsteps.getInstance().getEngine().onSoundRecieved(packet.getSound(), packet.getSource())) {
+        if (PresenceFootsteps.getInstance().engine.onSoundRecieved(packet.getSound(), packet.getSource())) {
             info.cancel();
         }
     }

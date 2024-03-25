@@ -9,6 +9,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.stream.Stream;
 
+import net.minecraft.server.packs.resources.PreparableReloadListener;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import eu.ha3.presencefootsteps.PFConfig;
@@ -17,13 +19,11 @@ import eu.ha3.presencefootsteps.sound.player.ImmediateSoundPlayer;
 import eu.ha3.presencefootsteps.util.PlayerUtil;
 import eu.ha3.presencefootsteps.world.Solver;
 import eu.ha3.presencefootsteps.world.PFSolver;
-import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Holder;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -40,8 +40,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.entity.vehicle.Boat;
 
-public class SoundEngine implements IdentifiableResourceReloadListener {
-    private static final ResourceLocation ID = new ResourceLocation("presencefootsteps", "sounds");
+public class SoundEngine implements PreparableReloadListener {
+    //private static final ResourceLocation ID = new ResourceLocation("presencefootsteps", "sounds");
 
     private Isolator isolator = new Isolator(this);
     private final Solver solver = new PFSolver(this);
@@ -201,14 +201,9 @@ public class SoundEngine implements IdentifiableResourceReloadListener {
     }
 
     @Override
-    public ResourceLocation getFabricId() {
-        return ID;
-    }
-
-    @Override
-    public CompletableFuture<Void> reload(PreparationBarrier sync, ResourceManager sender,
-                                          ProfilerFiller serverProfiler, ProfilerFiller clientProfiler,
-                                          Executor serverExecutor, Executor clientExecutor) {
+    public @NotNull CompletableFuture<Void> reload(PreparationBarrier sync, ResourceManager sender,
+                                                   ProfilerFiller serverProfiler, ProfilerFiller clientProfiler,
+                                                   Executor serverExecutor, Executor clientExecutor) {
         return sync.wait(null).thenRunAsync(() -> {
             clientProfiler.startTick();
             clientProfiler.push("Reloading PF Sounds");

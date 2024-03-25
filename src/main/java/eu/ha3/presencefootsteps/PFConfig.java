@@ -58,7 +58,7 @@ public class PFConfig extends JsonFile {
             stance = loco;
             save();
 
-            pf.getEngine().reload();
+            pf.engine.reload();
         }
 
         return loco;

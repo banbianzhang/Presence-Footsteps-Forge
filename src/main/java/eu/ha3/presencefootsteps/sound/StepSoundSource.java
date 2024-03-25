@@ -34,7 +34,7 @@ public interface StepSoundSource {
 
         @Override
         public boolean isStepBlocked() {
-            return PresenceFootsteps.getInstance().getEngine().isEnabledFor(entity);
+            return PresenceFootsteps.getInstance().engine.isEnabledFor(entity);
         }
     }
 }

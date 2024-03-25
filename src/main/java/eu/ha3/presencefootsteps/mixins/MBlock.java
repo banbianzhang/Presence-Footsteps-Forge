@@ -26,7 +26,7 @@ abstract class MAbstractBlock extends BlockBehaviour implements DerivedBlock {
     public BlockState getBaseBlockState() {
         Block baseBlock = ((DerivedBlock.Settings)properties).getBaseBlock();
         if (baseBlock == null) {
-            baseBlock = PresenceFootsteps.getInstance().getEngine().getIsolator().heuristics().getMostSimilar((Block)(Object)this);
+            baseBlock = PresenceFootsteps.getInstance().engine.getIsolator().heuristics().getMostSimilar((Block)(Object)this);
         }
         return (baseBlock == null ? Blocks.AIR : baseBlock).defaultBlockState();
     }
