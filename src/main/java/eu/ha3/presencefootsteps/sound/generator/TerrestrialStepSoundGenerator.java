@@ -1,11 +1,5 @@
 package eu.ha3.presencefootsteps.sound.generator;
 
-import net.minecraft.client.network.OtherClientPlayerEntity;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ArmorItem;
-import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.Nullable;
 
 import eu.ha3.presencefootsteps.config.Variator;
@@ -19,6 +13,12 @@ import eu.ha3.presencefootsteps.world.AssociationPool;
 import eu.ha3.presencefootsteps.world.Solver;
 import eu.ha3.presencefootsteps.world.SoundsKey;
 import eu.ha3.presencefootsteps.world.Substrates;
+import net.minecraft.client.player.RemotePlayer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ArmorItem;
 
 class TerrestrialStepSoundGenerator implements StepSoundGenerator {
     // Footsteps
@@ -77,7 +77,7 @@ class TerrestrialStepSoundGenerator implements StepSoundGenerator {
     }
 
     protected void simulateStationary() {
-        if (isImmobile && (entity.isOnGround() || !entity.isSubmergedInWater()) && playbackImmobile()) {
+        if (isImmobile && (entity.onGround() || !entity.isUnderWater()) && playbackImmobile()) {
             Association assos = associations.findAssociation(0d, isRightFoot);
 
             if (!assos.isSilent() || !isImmobile) {
@@ -113,11 +113,11 @@ class TerrestrialStepSoundGenerator implements StepSoundGenerator {
     }
 
     protected void simulateFootsteps() {
-        if (!(entity instanceof PlayerEntity)) {
-            entity.distanceTraveled += (float)Math.sqrt(motionTracker.getHorizontalSpeed()) * 0.6f;
+        if (!(entity instanceof Player)) {
+            entity.moveDist += (float)Math.sqrt(motionTracker.getHorizontalSpeed()) * 0.6f;
         }
 
-        final float distanceReference = entity.distanceTraveled;
+        final float distanceReference = entity.moveDist;
 
         stepThisFrame = false;
 
@@ -142,26 +142,26 @@ class TerrestrialStepSoundGenerator implements StepSoundGenerator {
 
         float dwm = distanceReference - dmwBase;
         boolean immobile = updateImmobileState(distanceReference);
-        if (immobile && !entity.isClimbing()) {
+        if (immobile && !entity.onClimbable()) {
             dwm = 0;
             dmwBase = distanceReference;
         }
 
-        if (entity.isOnGround() || entity.isSubmergedInWater() || entity.isClimbing()) {
+        if (entity.onGround() || entity.isUnderWater() || entity.onClimbable()) {
             State event = null;
 
             float distance = 0f;
             double verticalOffsetAsMinus = 0f;
             Variator variator = engine.getIsolator().variator();
 
-            if (entity.isClimbing() && !entity.isOnGround()) {
+            if (entity.onClimbable() && !entity.onGround()) {
                 distance = variator.DISTANCE_LADDER;
-            } else if (!entity.isSubmergedInWater() && Math.abs(yPosition - entity.getY()) > 0.4) {
+            } else if (!entity.isUnderWater() && Math.abs(yPosition - entity.getY()) > 0.4) {
                 // This ensures this does not get recorded as landing, but as a step
                 if (yPosition < entity.getY()) { // Going upstairs
                     distance = variator.DISTANCE_STAIR;
                     event = motionTracker.pickState(entity, State.UP, State.UP_RUN);
-                } else if (!entity.isSneaking()) { // Going downstairs
+                } else if (!entity.isShiftKeyDown()) { // Going downstairs
                     distance = -1f;
                     verticalOffsetAsMinus = 0f;
                     event = motionTracker.pickState(entity, State.DOWN, State.DOWN_RUN);
@@ -193,7 +193,7 @@ class TerrestrialStepSoundGenerator implements StepSoundGenerator {
             }
         }
 
-        if (entity.isOnGround()) {
+        if (entity.onGround()) {
             // This fixes an issue where the value is evaluated while the player is between
             // two steps in the air while descending stairs
             yPosition = entity.getY();
@@ -211,15 +211,15 @@ class TerrestrialStepSoundGenerator implements StepSoundGenerator {
         }
 
         if (hasStoppingConditions()) {
-            float volume = Math.min(1, (float) entity.getVelocity().length() * 0.35F);
+            float volume = Math.min(1, (float) entity.getDeltaMovement().length() * 0.35F);
             Options options = Options.singular("gliding_volume", volume);
-            State state = entity.isSubmergedInWater() ? State.SWIM : event;
+            State state = entity.isUnderWater() ? State.SWIM : event;
 
             engine.getIsolator().acoustics().playAcoustic(entity, SoundsKey.SWIM, state, options);
 
-            playStep(associations.findAssociation(entity.getBlockPos().down(), Solver.MESSY_FOLIAGE_STRATEGY), event);
+            playStep(associations.findAssociation(entity.blockPosition().below(), Solver.MESSY_FOLIAGE_STRATEGY), event);
         } else {
-            if (!entity.isSneaky() || event.isExtraLoud()) {
+            if (!entity.isDiscrete() || event.isExtraLoud()) {
                 playStep(associations.findAssociation(verticalOffsetAsMinus, isRightFoot), event);
             }
             isRightFoot = !isRightFoot;
@@ -229,11 +229,11 @@ class TerrestrialStepSoundGenerator implements StepSoundGenerator {
     }
 
     protected boolean hasStoppingConditions() {
-        return entity.isTouchingWater();
+        return entity.isInWater();
     }
 
     protected void simulateAirborne() {
-        if ((entity.isOnGround() || entity.isClimbing()) == isAirborne) {
+        if ((entity.onGround() || entity.onClimbable()) == isAirborne) {
             isAirborne = !isAirborne;
             simulateJumpingLanding();
         }
@@ -244,7 +244,7 @@ class TerrestrialStepSoundGenerator implements StepSoundGenerator {
     }
 
     protected double getOffsetMinus() {
-        if (entity instanceof OtherClientPlayerEntity) {
+        if (entity instanceof RemotePlayer) {
             return 1;
         }
         return 0;
@@ -287,7 +287,7 @@ class TerrestrialStepSoundGenerator implements StepSoundGenerator {
                 // Always assume the player lands on their two feet
                 // Do not toggle foot:
                 // After landing sounds, the first foot will be same as the one used to jump.
-            } else if (!stepThisFrame && !entity.isSneaking()) {
+            } else if (!stepThisFrame && !entity.isShiftKeyDown()) {
                 playSinglefoot(getOffsetMinus(), motionTracker.pickState(entity, State.CLIMB, State.CLIMB_RUN), isRightFoot);
                 if (!stepThisFrame) {
                     isRightFoot = !isRightFoot;
@@ -303,13 +303,13 @@ class TerrestrialStepSoundGenerator implements StepSoundGenerator {
 
         brushesTime = System.currentTimeMillis() + 100;
 
-        if (motionTracker.isStationary() || entity.isSneaking() || !entity.getEquippedStack(EquipmentSlot.FEET).isEmpty()) {
+        if (motionTracker.isStationary() || entity.isShiftKeyDown() || !entity.getItemBySlot(EquipmentSlot.FEET).isEmpty()) {
             return;
         }
 
-        Association assos = associations.findAssociation(BlockPos.ofFloored(
+        Association assos = associations.findAssociation(BlockPos.containing(
             entity.getX(),
-            entity.getY() - 0.1D - (entity.hasVehicle() ? entity.getRidingOffset(entity.getVehicle()) : 0) - (entity.isOnGround() ? 0 : 0.25D),
+            entity.getY() - 0.1D - (entity.isPassenger() ? entity.getMyRidingOffset(entity.getVehicle()) : 0) - (entity.onGround() ? 0 : 0.25D),
             entity.getZ()
         ), Solver.MESSY_FOLIAGE_STRATEGY);
 
@@ -325,7 +325,7 @@ class TerrestrialStepSoundGenerator implements StepSoundGenerator {
 
     protected void playStep(Association association, State eventType) {
         if (engine.getConfig().getEnabledFootwear()) {
-            if (entity.getEquippedStack(EquipmentSlot.FEET).getItem() instanceof ArmorItem bootItem) {
+            if (entity.getItemBySlot(EquipmentSlot.FEET).getItem() instanceof ArmorItem bootItem) {
                 SoundsKey bootSound = engine.getIsolator().primitives().getAssociation(bootItem.getEquipSound(), Substrates.DEFAULT);
                 if (bootSound.isEmitter()) {
                     engine.getIsolator().acoustics().playStep(association, eventType, Options.singular("volume_percentage", 0.5F));

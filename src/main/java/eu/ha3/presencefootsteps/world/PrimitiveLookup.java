@@ -3,19 +3,19 @@ package eu.ha3.presencefootsteps.world;
 import java.io.IOException;
 import java.util.Locale;
 import java.util.Map;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.level.block.SoundType;
 import eu.ha3.presencefootsteps.util.JsonObjectWriter;
-import net.minecraft.sound.BlockSoundGroup;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.util.Identifier;
 
 public class PrimitiveLookup extends AbstractSubstrateLookup<SoundEvent> {
     @Override
-    protected Identifier getId(SoundEvent key) {
-        return key.getId();
+    protected ResourceLocation getId(SoundEvent key) {
+        return key.getLocation();
     }
 
     @Override
-    public void writeToReport(boolean full, JsonObjectWriter writer, Map<String, BlockSoundGroup> groups) throws IOException {
+    public void writeToReport(boolean full, JsonObjectWriter writer, Map<String, SoundType> groups) throws IOException {
         writer.each(groups.values(), group -> {
             SoundEvent event = group.getStepSound();
             if (full || !contains(event)) {
@@ -24,11 +24,11 @@ public class PrimitiveLookup extends AbstractSubstrateLookup<SoundEvent> {
         });
     }
 
-    public static String getSubstrate(BlockSoundGroup group) {
+    public static String getSubstrate(SoundType group) {
         return String.format(Locale.ENGLISH, "%.2f_%.2f", group.volume, group.pitch);
     }
 
-    public static String getKey(BlockSoundGroup group) {
-        return group.getStepSound().getId().toString() + "@" + getSubstrate(group);
+    public static String getKey(SoundType group) {
+        return group.getStepSound().getLocation().toString() + "@" + getSubstrate(group);
     }
 }

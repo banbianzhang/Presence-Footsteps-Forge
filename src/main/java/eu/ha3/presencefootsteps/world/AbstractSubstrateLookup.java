@@ -2,26 +2,25 @@ package eu.ha3.presencefootsteps.world;
 
 import java.util.Map;
 import java.util.Set;
-
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
-import net.minecraft.util.Identifier;
 
 abstract class AbstractSubstrateLookup<T> implements Lookup<T> {
-    private final Map<String, Map<Identifier, SoundsKey>> substrates = new Object2ObjectLinkedOpenHashMap<>();
+    private final Map<String, Map<ResourceLocation, SoundsKey>> substrates = new Object2ObjectLinkedOpenHashMap<>();
 
-    protected abstract Identifier getId(T key);
+    protected abstract ResourceLocation getId(T key);
 
     @Override
     public SoundsKey getAssociation(T key, String substrate) {
-        final Identifier id = getId(key);
+        final ResourceLocation id = getId(key);
         return getSubstrateMap(id, substrate).getOrDefault(id, SoundsKey.UNASSIGNED);
     }
 
     @Nullable
-    protected Map<Identifier, SoundsKey> getSubstrateMap(Identifier id, String substrate) {
-        Map<Identifier, SoundsKey> primitives = substrates.get(substrate);
+    protected Map<ResourceLocation, SoundsKey> getSubstrateMap(ResourceLocation id, String substrate) {
+        Map<ResourceLocation, SoundsKey> primitives = substrates.get(substrate);
         if (primitives != null) {
             return primitives;
         }
@@ -50,12 +49,12 @@ abstract class AbstractSubstrateLookup<T> implements Lookup<T> {
 
         substrates
             .computeIfAbsent(substrate, s -> new Object2ObjectLinkedOpenHashMap<>())
-            .put(new Identifier(primitive), SoundsKey.of(value));
+            .put(new ResourceLocation(primitive), SoundsKey.of(value));
     }
 
     @Override
     public boolean contains(T key) {
-        final Identifier primitive = getId(key);
+        final ResourceLocation primitive = getId(key);
 
         for (var primitives : substrates.values()) {
             if (primitives.containsKey(primitive)) {

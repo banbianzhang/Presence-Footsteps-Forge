@@ -10,36 +10,36 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import eu.ha3.presencefootsteps.PresenceFootsteps;
 import eu.ha3.presencefootsteps.api.DerivedBlock;
-import net.minecraft.block.AbstractBlock;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.StairsBlock;
-import net.minecraft.block.AbstractBlock.Settings;
-import net.minecraft.block.Block;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.StairBlock;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.BlockBehaviour.Properties;
+import net.minecraft.world.level.block.state.BlockState;
 
 
 @Mixin(Block.class)
-abstract class MAbstractBlock extends AbstractBlock implements DerivedBlock {
+abstract class MAbstractBlock extends BlockBehaviour implements DerivedBlock {
     MAbstractBlock() { super(null); }
 
     @Override
     public BlockState getBaseBlockState() {
-        Block baseBlock = ((DerivedBlock.Settings)settings).getBaseBlock();
+        Block baseBlock = ((DerivedBlock.Settings)properties).getBaseBlock();
         if (baseBlock == null) {
             baseBlock = PresenceFootsteps.getInstance().getEngine().getIsolator().heuristics().getMostSimilar((Block)(Object)this);
         }
-        return (baseBlock == null ? Blocks.AIR : baseBlock).getDefaultState();
+        return (baseBlock == null ? Blocks.AIR : baseBlock).defaultBlockState();
     }
 }
 
-@Mixin(StairsBlock.class)
+@Mixin(StairBlock.class)
 abstract class MStairsBlock implements DerivedBlock {
     @Accessor("baseBlockState")
     @Override
     public abstract BlockState getBaseBlockState();
 }
 
-@Mixin(Settings.class)
+@Mixin(Properties.class)
 abstract class MBlockSettings implements DerivedBlock.Settings {
     @Nullable
     private Block baseBlock;
@@ -56,7 +56,7 @@ abstract class MBlockSettings implements DerivedBlock.Settings {
     }
 
     @Inject(method = "copy", at = @At("RETURN"))
-    private static void onCopy(AbstractBlock block, CallbackInfoReturnable<Settings> info) {
+    private static void onCopy(BlockBehaviour block, CallbackInfoReturnable<Properties> info) {
         if (block instanceof Block b) {
             ((DerivedBlock.Settings)info.getReturnValue()).setBaseBlock(b);
         }
@@ -67,14 +67,14 @@ abstract class MBlockSettings implements DerivedBlock.Settings {
 @Mixin(targets = "net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings")
 abstract class MFabricBlockSettings {
     @Inject(method = "copyOf(Lnet/minecraft/block/AbstractBlock;)Lnet/fabricmc/fabric/api/object/builder/v1/block/FabricBlockSettings;", at = @At("RETURN"), require = 0)
-    private static void onCopyOf(AbstractBlock block, CallbackInfoReturnable<?> info) {
+    private static void onCopyOf(BlockBehaviour block, CallbackInfoReturnable<?> info) {
         if (block instanceof Block b) {
             ((DerivedBlock.Settings)info.getReturnValue()).setBaseBlock(b);
         }
     }
 
     @Inject(method = "copyOf(Lnet/minecraft/block/AbstractBlock$Settings;)Lnet/fabricmc/fabric/api/object/builder/v1/block/FabricBlockSettings;", at = @At("RETURN"), require = 0)
-    private static void onCopyOf(AbstractBlock.Settings settings, CallbackInfoReturnable<?> info) {
+    private static void onCopyOf(BlockBehaviour.Properties settings, CallbackInfoReturnable<?> info) {
         ((DerivedBlock.Settings)info.getReturnValue()).setBaseBlock(((DerivedBlock.Settings)settings).getBaseBlock());
     }
 }

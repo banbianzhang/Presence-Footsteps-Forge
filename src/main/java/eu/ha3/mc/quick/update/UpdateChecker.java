@@ -5,14 +5,12 @@ import java.io.Reader;
 import java.net.URL;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-
+import net.minecraft.Util;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-
-import net.minecraft.util.Util;
 
 public class UpdateChecker {
     private static final Logger LOGGER = LogManager.getLogger("UpdateChecker");
@@ -76,7 +74,7 @@ public class UpdateChecker {
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
-        }, Util.getIoWorkerExecutor()).exceptionally(e -> {
+        }, Util.ioPool()).exceptionally(e -> {
             LOGGER.error("Error occured whilst checking for updates", e);
             return null;
         });

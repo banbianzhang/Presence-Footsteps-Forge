@@ -4,20 +4,20 @@ import eu.ha3.presencefootsteps.compat.ContraptionCollidable;
 import eu.ha3.presencefootsteps.sound.SoundEngine;
 import eu.ha3.presencefootsteps.util.PlayerUtil;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
-import net.minecraft.block.BlockState;
-import net.minecraft.client.network.OtherClientPlayerEntity;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.registry.tag.FluidTags;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Direction.Axis;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.world.World;
+import net.minecraft.client.player.RemotePlayer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Direction.Axis;
+import net.minecraft.tags.FluidTags;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class PFSolver implements Solver {
     private static final double TRAP_DOOR_OFFSET = 0.1;
@@ -32,7 +32,7 @@ public class PFSolver implements Solver {
     }
 
     private BlockState getBlockStateAt(Entity entity, BlockPos pos) {
-        World world = entity.getWorld();
+        Level world = entity.level();
         BlockState state = world.getBlockState(pos);
 
         if (state.isAir() && (entity instanceof ContraptionCollidable collidable)) {
@@ -42,28 +42,28 @@ public class PFSolver implements Solver {
         return state.getAppearance(world, pos, Direction.UP, state, pos);
     }
 
-    private Box getCollider(Entity player) {
-        Box collider = player.getBoundingBox();
+    private AABB getCollider(Entity player) {
+        AABB collider = player.getBoundingBox();
         // normalize to the bottom of the block
         // so we can detect carpets on top of fences
-        collider = collider.offset(0, -(collider.minY - Math.floor(collider.minY)), 0);
+        collider = collider.move(0, -(collider.minY - Math.floor(collider.minY)), 0);
 
         double expansionRatio = 0.1;
 
         // add buffer
-        collider = collider.expand(expansionRatio);
+        collider = collider.inflate(expansionRatio);
         if (player.isSprinting()) {
-            collider = collider.expand(0.3, 0.5, 0.3);
+            collider = collider.inflate(0.3, 0.5, 0.3);
         }
         return collider;
     }
 
-    private boolean checkCollision(World world, BlockState state, BlockPos pos, Box collider) {
+    private boolean checkCollision(Level world, BlockState state, BlockPos pos, AABB collider) {
         VoxelShape shape = state.getCollisionShape(world, pos);
         if (shape.isEmpty()) {
-            shape = state.getOutlineShape(world, pos);
+            shape = state.getShape(world, pos);
         }
-        return shape.isEmpty() || shape.getBoundingBox().offset(pos).intersects(collider);
+        return shape.isEmpty() || shape.bounds().move(pos).intersects(collider);
     }
 
     @Override
@@ -71,7 +71,7 @@ public class PFSolver implements Solver {
         if (!MESSY_FOLIAGE_STRATEGY.equals(strategy)) {
             return Association.NOT_EMITTER;
         }
-        pos = pos.up();
+        pos = pos.above();
         BlockState above = getBlockStateAt(ply, pos);
 
         SoundsKey foliage = engine.getIsolator().blocks().getAssociation(above, Substrates.FOLIAGE);
@@ -87,29 +87,29 @@ public class PFSolver implements Solver {
     @Override
     public Association findAssociation(AssociationPool associations, LivingEntity ply, double verticalOffsetAsMinus, boolean isRightFoot) {
 
-        double rot = Math.toRadians(MathHelper.wrapDegrees(ply.getYaw()));
+        double rot = Math.toRadians(Mth.wrapDegrees(ply.getYRot()));
 
-        Vec3d pos = ply.getPos();
+        Vec3 pos = ply.position();
 
         float feetDistanceToCenter = 0.2f * (isRightFoot ? -1 : 1)
                 * PlayerUtil.getScale(ply) // scale foot offset by the player's scale
         ;
 
-        BlockPos footPos = BlockPos.ofFloored(
+        BlockPos footPos = BlockPos.containing(
             pos.x + Math.cos(rot) * feetDistanceToCenter,
-            ply.getBoundingBox().getMin(Axis.Y) - TRAP_DOOR_OFFSET - verticalOffsetAsMinus,
+            ply.getBoundingBox().min(Axis.Y) - TRAP_DOOR_OFFSET - verticalOffsetAsMinus,
             pos.z + Math.sin(rot) * feetDistanceToCenter
         );
 
-        if (!(ply instanceof OtherClientPlayerEntity)) {
-            Vec3d vel = ply.getVelocity();
+        if (!(ply instanceof RemotePlayer)) {
+            Vec3 vel = ply.getDeltaMovement();
 
-            if (vel.lengthSquared() != 0 && Math.abs(vel.y) < 0.004) {
+            if (vel.lengthSqr() != 0 && Math.abs(vel.y) < 0.004) {
                 return Association.NOT_EMITTER; // Don't play sounds on every tiny bounce
             }
         }
 
-        long time = ply.getWorld().getTime();
+        long time = ply.level().getGameTime();
         if (time != lastUpdateTime) {
             lastUpdateTime = time;
             associationCache.clear();
@@ -120,12 +120,12 @@ public class PFSolver implements Solver {
             return cached;
         }
 
-        Box collider = getCollider(ply);
+        AABB collider = getCollider(ply);
 
-        BlockPos.Mutable mutableFootPos = footPos.mutableCopy();
+        BlockPos.MutableBlockPos mutableFootPos = footPos.mutable();
 
         if (feetDistanceToCenter > 1) {
-            for (BlockPos underfootPos : BlockPos.iterateOutwards(footPos, (int)feetDistanceToCenter, 2, (int)feetDistanceToCenter)) {
+            for (BlockPos underfootPos : BlockPos.withinManhattan(footPos, (int)feetDistanceToCenter, 2, (int)feetDistanceToCenter)) {
                 mutableFootPos.set(underfootPos);
                 Association assos = findAssociation(associations, ply, collider, underfootPos, mutableFootPos);
                 if (assos.isResult()) {
@@ -140,7 +140,7 @@ public class PFSolver implements Solver {
         return assos;
     }
 
-    private Association findAssociation(AssociationPool associations, LivingEntity player, Box collider, BlockPos originalFootPos, BlockPos.Mutable pos) {
+    private Association findAssociation(AssociationPool associations, LivingEntity player, AABB collider, BlockPos originalFootPos, BlockPos.MutableBlockPos pos) {
         Association association;
 
         // If it didn't work, the player has walked over the air on the border of a block.
@@ -198,16 +198,16 @@ public class PFSolver implements Solver {
                 : pos.move(Direction.EAST, xdang > 0 ? 1 : -1), collider);
     }
 
-    private Association findAssociation(AssociationPool associations, LivingEntity entity, BlockPos.Mutable pos, Box collider) {
+    private Association findAssociation(AssociationPool associations, LivingEntity entity, BlockPos.MutableBlockPos pos, AABB collider) {
         associations.reset();
         BlockState target = getBlockStateAt(entity, pos);
 
         // Try to see if the block above is a carpet...
         pos.move(Direction.UP);
-        final boolean hasRain = entity.getWorld().hasRain(pos);
+        final boolean hasRain = entity.level().isRainingAt(pos);
         BlockState carpet = getBlockStateAt(entity, pos);
-        VoxelShape shape = carpet.getOutlineShape(entity.getWorld(), pos);
-        boolean isValidCarpet = !shape.isEmpty() && shape.getMax(Axis.Y) < 0.3F;
+        VoxelShape shape = carpet.getShape(entity.level(), pos);
+        boolean isValidCarpet = !shape.isEmpty() && shape.max(Axis.Y) < 0.3F;
         SoundsKey association = SoundsKey.UNASSIGNED;
         SoundsKey foliage = SoundsKey.UNASSIGNED;
         SoundsKey wetAssociation = SoundsKey.UNASSIGNED;
@@ -237,8 +237,8 @@ public class PFSolver implements Solver {
             }
 
             if (engine.getConfig().foliageSoundsVolume.get() > 0) {
-                if (entity.getEquippedStack(EquipmentSlot.FEET).isEmpty() || entity.isSprinting()) {
-                    if (association.isEmitter() && carpet.getCollisionShape(entity.getWorld(), pos).isEmpty()) {
+                if (entity.getItemBySlot(EquipmentSlot.FEET).isEmpty() || entity.isSprinting()) {
+                    if (association.isEmitter() && carpet.getCollisionShape(entity.level(), pos).isEmpty()) {
                         // This condition implies that foliage over a NOT_EMITTER block CANNOT PLAY
                         // This block must not be executed if the association is a carpet
                         pos.move(Direction.UP);
@@ -250,14 +250,14 @@ public class PFSolver implements Solver {
         }
 
         // Check collision against small blocks
-        if (association.isResult() && !checkCollision(entity.getWorld(), target, pos, collider)) {
+        if (association.isResult() && !checkCollision(entity.level(), target, pos, collider)) {
             association = SoundsKey.NON_EMITTER;
         }
 
         if (association.isEmitter() && (hasRain
                 || (!associations.wasLastMatchGolem() && (
-                   target.getFluidState().isIn(FluidTags.WATER)
-                || carpet.getFluidState().isIn(FluidTags.WATER)
+                   target.getFluidState().is(FluidTags.WATER)
+                || carpet.getFluidState().is(FluidTags.WATER)
         )))) {
             // Only if the block is open to the sky during rain
             // or the block is submerged
