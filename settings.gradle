@@ -6,8 +6,12 @@ pluginManagement {
             url = 'https://maven.fabricmc.net/'
         }
         maven {
-            name = 'Jitpack'
-            url = 'https://jitpack.io'
+            name = 'Architectury'
+            url = 'https://maven.architectury.dev/'
+        }
+        maven {
+            name = 'Forge'
+            url = 'https://maven.minecraftforge.net/'
         }
         gradlePluginPortal()
     }
