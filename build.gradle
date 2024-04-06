@@ -1,13 +1,7 @@
 plugins {
     id 'java-library'
-    id 'dev.architectury.loom' version '1.4.+'
-}
-
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
-    }
-    withSourcesJar()
+    id 'net.minecraftforge.gradle' version '[6.0.16,6.2)'
+    id 'org.spongepowered.mixin' version '0.7-SNAPSHOT'
 }
 
 group = project.group
@@ -15,23 +9,39 @@ description = project.displayname
 base.archivesName = project.name
 version = '1.20.4-1.12.0-beta.1'
 
-loom {
-    mixin.defaultRefmapName = 'presencefootsteps.mixin.refmap.json'
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
-    forge {
-        mixinConfig 'presencefootsteps.mixin.json'
+minecraft {
+    mappings channel: 'official', version: '1.20.4'
+    copyIdeResources = true
+
+    runs {
+        client {
+            property 'forge.logging.console.level', 'debug'
+            arg '-mixin.config=presencefootsteps.mixin.json'
+        }
     }
-
-    silentMojangMappingsLicense()
 }
 
 dependencies {
-    minecraft 'com.mojang:minecraft:1.20.4'
-    mappings loom.officialMojangMappings()
+    minecraft 'net.minecraftforge:forge:1.20.4-49.0.39'
+    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+}
 
-    forge 'net.minecraftforge:forge:1.20.4-49.0.38'
+tasks.named('jar', Jar) {
+    finalizedBy 'reobfJar'
 }
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = "UTF-8"
+}
+
+mixin {
+    add sourceSets.main, 'presencefootsteps.mixin.refmap.json'
+}
+
+sourceSets.each {
+    def dir = layout.buildDirectory.dir("sourcesSets/$it.name")
+    it.output.resourcesDir = dir
+    it.java.destinationDirectory = dir
 }
