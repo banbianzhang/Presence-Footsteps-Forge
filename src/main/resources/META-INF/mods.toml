@@ -17,7 +17,7 @@ description = "An overly complicated sound mod, ported to Forge."
 [[dependencies.presencefootsteps]]
 modId = "forge"
 mandatory = true
-versionRange = "[49.0.38,)"
+versionRange = "[49.0.39,)"
 ordering = "NONE"
 side = "CLIENT"
 
