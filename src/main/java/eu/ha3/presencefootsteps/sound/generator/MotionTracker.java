@@ -1,10 +1,13 @@
 package eu.ha3.presencefootsteps.sound.generator;
 
+import eu.ha3.presencefootsteps.PresenceFootsteps;
 import eu.ha3.presencefootsteps.sound.State;
 import eu.ha3.presencefootsteps.util.PlayerUtil;
 import net.minecraft.client.player.RemotePlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class MotionTracker {
     private double lastX;
@@ -40,6 +43,8 @@ public class MotionTracker {
     public boolean isStationary() {
         return motionX == 0 && motionZ == 0;
     }
+
+    public static final Logger logger = LogManager.getLogger("MotionTracker");
 
     /**
      * Fills in the blanks that aren't present on the client when playing on a
@@ -97,10 +102,16 @@ public class MotionTracker {
     }
 
     public float getSpeedScalingRatio(LivingEntity entity) {
-        generator.variator.RUNNING_RAMPUP_BEGIN = 0.011F;
-        generator.variator.RUNNING_RAMPUP_END = 0.022F;
-        double relativeSpeed = getHorizontalSpeed() + (getMotionY() * getMotionY()) - generator.variator.RUNNING_RAMPUP_BEGIN;
-        double maxSpeed = generator.variator.RUNNING_RAMPUP_END - generator.variator.RUNNING_RAMPUP_BEGIN;
+        double relativeSpeed=0F;
+        double maxSpeed=0.011F;
+        if(generator.variator!=null) {
+            generator.variator.RUNNING_RAMPUP_BEGIN = 0.011F;
+            generator.variator.RUNNING_RAMPUP_END = 0.022F;
+            relativeSpeed = getHorizontalSpeed() + (getMotionY() * getMotionY()) - generator.variator.RUNNING_RAMPUP_BEGIN;
+            maxSpeed = generator.variator.RUNNING_RAMPUP_END - generator.variator.RUNNING_RAMPUP_BEGIN;
+        } else {
+            logger.warn("generator.variator is null:{}",generator);
+        }
         return (float)Mth.clamp(relativeSpeed / maxSpeed, 0, 1);
     }
 }

@@ -1,7 +1,7 @@
 plugins {
     id 'java-library'
     id 'dev.architectury.loom' version '1.4.+'
-    id 'org.ajoberstar.reckon' version '0.13.0'
+    id 'org.ajoberstar.reckon' version '0.13.1'
 }
 
 java {
@@ -50,4 +50,15 @@ tasks.named('processResources', ProcessResources) {
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = "UTF-8"
+}
+
+repositories {
+    maven {
+        url "https://plugins.gradle.org/m2/"
+    }
+}
+
+jar {
+    destinationDir = file('build/libs')
+    archiveName = 'PresenceFootsteps-1.20.1-1.9.1-fix.1.jar'
 }
